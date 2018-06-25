@@ -23,10 +23,10 @@ namespace Eu4Parser
         public int development;
         public int id;
         public bool coal;
-        
+        public bool fort;
         public Province(int id, string owner, string controller, string capital, string tradeGood, string religion , string culture, 
             int tax, int production, int manpower,
-            bool centerOfTrade, bool city, bool hre, bool coal)
+            bool centerOfTrade, bool city, bool hre, bool coal, bool fort)
         {
             this.id = id;
             this.owner = owner;
@@ -45,13 +45,14 @@ namespace Eu4Parser
             this.city = city;
             this.hre = hre;
             this.coal = coal;
+            this.fort = fort;
 
         }
         public void Print()
         {
             Console.WriteLine(id + "-" + owner + " " + capital + " Development: " + development + "(" + tax + ", " + production + ", " + manpower + ")" +
                 " Culture: " + culture + " Religion: " + religion + " Trade Good: " + tradeGood + " Has coal: " + coal + " In hre: " + hre +
-                " Is a city: " + city + " Is a center of trade: " + centerOfTrade);
+                " Is a city: " + city + " Is a center of trade: " + centerOfTrade +" Has a fort: "+ fort);
         } 
     }
 }
