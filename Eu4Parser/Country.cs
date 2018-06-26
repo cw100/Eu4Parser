@@ -3,21 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Drawing;
 namespace Eu4Parser
 {
-    public struct Colour
-    {
-        public int r;
-        public int g;
-        public int b;
-         public Colour(int r, int g, int b)
-        {
-            this.r = r;
-            this.g = g;
-            this.b = b;
-        }
-    }
+    
 
             
     class Country
@@ -35,7 +24,7 @@ namespace Eu4Parser
         public int totalManpower;
         public int captialId;
         public string capitalName;
-        public Colour color;
+        public Color color;
         public int mercantilism;
         public bool existsIn1444;
         public bool inHRE;
@@ -80,7 +69,7 @@ namespace Eu4Parser
         {
             try
             {
-                color = new Colour(int.Parse(r), int.Parse(g), int.Parse(b));
+                color =  Color.FromArgb( int.Parse(r), int.Parse(g), int.Parse(b));
             }
             catch
             {
@@ -157,10 +146,40 @@ namespace Eu4Parser
         public void Print()
         {
             if (existsIn1444)
-               // Console.WriteLine(tag + " " + name + " " + development + " (" + totalTax + ", " + totalProduction + ", " + totalManpower + ") " + primaryCulture + " " + religion + " " + capitalName + " " + techGroup + " " + governmentType + " " + " Exists in 1444 " + existsIn1444 + " In hre " + inHRE);
-           
+                // Console.WriteLine(tag + " " + name + " " + development + " (" + totalTax + ", " + totalProduction + ", " + totalManpower + ") " + primaryCulture + " " + religion + " " + capitalName + " " + techGroup + " " + governmentType + " " + " Exists in 1444 " + existsIn1444 + " In hre " + inHRE);
+                if (ClosestConsoleColor(color.R, color.G, color.B) != ConsoleColor.Black)
+                {
+                    Console.ForegroundColor = ClosestConsoleColor(color.R, color.G, color.B);
+                }
+                 else
+                {
+                    Console.ForegroundColor = ClosestConsoleColor(color.R, color.G, color.B);
+                    Console.BackgroundColor = ConsoleColor.White;
+                }
+
             Console.WriteLine(tag + " " + name + " " + development + " (" + totalTax + ", " + totalProduction + ", " + totalManpower + ")");
-            
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.BackgroundColor = ConsoleColor.Black;
+        }
+        static ConsoleColor ClosestConsoleColor(byte r, byte g, byte b)
+        {
+            ConsoleColor ret = 0;
+            double rr = r, gg = g, bb = b, delta = double.MaxValue;
+
+            foreach (ConsoleColor cc in Enum.GetValues(typeof(ConsoleColor)))
+            {
+                var n = Enum.GetName(typeof(ConsoleColor), cc);
+                var c = Color.FromName(n == "DarkYellow" ? "Orange" : n); 
+                var t = Math.Pow(c.R - rr, 2.0) + Math.Pow(c.G - gg, 2.0) + Math.Pow(c.B - bb, 2.0);
+                if (t == 0.0)
+                    return cc;
+                if (t < delta)
+                {
+                    delta = t;
+                    ret = cc;
+                }
+            }
+            return ret;
         }
     }
 }

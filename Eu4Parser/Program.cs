@@ -20,10 +20,7 @@ namespace Eu4Parser
             provinces = LoadProvinces(path);
             provinces = provinces.OrderBy(o => o.id).ToList();
 
-            //foreach (Province province in provinces)
-            //{
-            //    province.Print();
-            //}
+            
 
 
             List<Country> countries = new List<Country>();
@@ -32,6 +29,10 @@ namespace Eu4Parser
             foreach (Country country in countries)
             {
                 country.Print();
+            }
+            foreach (Province province in provinces)
+           {
+                province.Print();
             }
             Console.Read();
         }
@@ -102,20 +103,25 @@ namespace Eu4Parser
                             break;
                         case "culture":
                             if (culture == "")
-                                culture = statement[2];
+                                culture = statement[2].Trim();
                             break;
                         case "religion":
                             if (religion == "")
-                                religion = statement[2];
+                                religion = Regex.Replace(statement[2], "\"", "").Trim(); //Regex required for one province that has the religion in quotes for some insane reason
                             break;
                         case "capital":
                             if (capital == "")
                                 for (int b = 2; b < statement.Length; b++)
                                 {
+                                 
+                                            if (statement[b].Contains("#"))
+                                    {
+                                        break;
+                                    }
                                     capital += Regex.Replace(statement[b], "\"", "") + " ";
                                 }
-                            capital.Trim();
-                           
+                            capital = capital.Trim();
+
                             break;
                         case "trade_goods":
                             if (tradeGood == "")
@@ -249,12 +255,13 @@ namespace Eu4Parser
                                             break;
                                         case "culture":
 
-                                            culture = updateProvinceStatements[k + 2];
+                                            culture = updateProvinceStatements[k + 2].Trim();
                                             break;
                                         case "religion":
                                         try
                                         {
-                                            religion = updateProvinceStatements[k + 2];
+                                            religion = Regex.Replace(statement[k + 2], "\"", "").Trim();
+                                         
                                         }
                                         catch
 
@@ -307,7 +314,20 @@ namespace Eu4Parser
 
                                             }
                                             break;
-                                        case "is_city":
+                                    case "capital":
+                                        if (capital == "")
+                                            for (int b = 2; b < statement.Length; b++)
+                                            {
+                                                if (statement[b].Contains("#"))
+                                                {
+                                                    break;
+                                                }
+                                                capital += Regex.Replace(statement[b], "\"", "") + " ";
+                                            }
+                                        capital = capital.Trim();
+
+                                        break;
+                                    case "is_city":
                                             if (updateProvinceStatements[k + 2].Contains("yes"))
                                                 city = true;
                                         if (updateProvinceStatements[k + 2].Contains("no"))
