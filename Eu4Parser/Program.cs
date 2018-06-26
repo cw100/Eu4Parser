@@ -83,8 +83,12 @@ namespace Eu4Parser
                 string[] lines = File.ReadAllLines(file);
                 for(int i = 0; i<lines.Count();i++)
                 {
-                     
+                    
+                        lines[i] = Regex.Replace(lines[i], @"\t", " ");
+                    while (lines[i].Contains("  "))
+                        lines[i] = Regex.Replace(lines[i], "  ", " ");
                     string[] statement = lines[i].Split(' ');
+                   
                     switch (statement[0])
                     {
                         case "owner":
@@ -106,9 +110,9 @@ namespace Eu4Parser
                             break;
                         case "capital":
                             if (capital == "")
-                                for (int j = 2; j < statement.Length; j++)
+                                for (int b = 2; b < statement.Length; b++)
                                 {
-                                    capital += Regex.Replace(statement[j], "\"", "") + " ";
+                                    capital += Regex.Replace(statement[b], "\"", "") + " ";
                                 }
                             capital.Trim();
                            
@@ -176,42 +180,60 @@ namespace Eu4Parser
                         default:
                             break;
                     }
-                    try
-                    {
-                        string[] dateString = statement[0].Split('.');
+                    List<string> updateProvinceStatements = new List<string>();
+                    string[] dateString = statement[0].Split('.');
                         if (dateString[0].StartsWith("1"))
                         {
-                            DateTime date = new DateTime(int.Parse(dateString[0]), int.Parse(dateString[1]), int.Parse(dateString[2]));
-                            DateTime startDate = new DateTime(1444, 11, 12);
+                        DateTime startDate = new DateTime(1444,11, 12);
+                        DateTime date = startDate.AddDays(1);
+                        try
+                        {
+                           
+                             date = new DateTime(int.Parse(Regex.Replace(dateString[0], "[^.0-9]", ""))
+                                 , int.Parse(Regex.Replace(dateString[1], "[^.0-9]", "")), 
+                                 int.Parse(Regex.Replace(dateString[2], "[^.0-9]", "")));
+                        }
+                        catch
+                        {
+                           
+                        }
+                        
                             
                             if (date <= startDate)
                             {
-                                List<string> updateProvinceStatements = new List<string>();
+                               
                                 foreach (String statement2 in lines[i].Split(' ', '{', '}'))
-                                    updateProvinceStatements.Add(statement2.TrimStart());
-                                for (int j = i+1; j <= lines.Count(); j++)
-                                { 
-                                    if (!(lines[j].Substring(0, 1) == "}") && !(lines[j].Substring(0,1) == "1"))
+                                {
+                                    if (statement2 != ""&& statement2 != " ")
                                     {
-                                       
-                                            foreach (String statement2 in lines[j].Split(' ','{', '}'))
+                                        updateProvinceStatements.Add(statement2.TrimStart());
+                                    }
+                                }
+                                for (int j = i+1; j < lines.Count(); j++)
+                                {
+
+
+                                if (!lines[j].StartsWith("}") && !lines[j].StartsWith("1"))
+                                    {
+
+                                        foreach (String statement2 in lines[j].Split(' ', '{', '}'))
+                                        {
+                                            if (statement2 != "" && statement2 != " ")
+                                            {
                                                 updateProvinceStatements.Add(statement2.TrimStart());
-                                        
+                                            }
+                                        }
 
                                     }
                                     else
                                     {
-                                        j = lines.Count() + 1;
+                                    break;
                                     }
 
                                 }
-                                for (int k = 0; k<=updateProvinceStatements.Count();k++)
+                                for (int k = 0; k<updateProvinceStatements.Count();k++)
                                 {
-
-                                    if (owner == "MNG")
-                                    {
-                                        var asd = 0;
-                                    }
+                                  
                                     switch (updateProvinceStatements[k].Trim())
                                     {
                                         case "owner":
@@ -230,19 +252,19 @@ namespace Eu4Parser
                                             culture = updateProvinceStatements[k + 2];
                                             break;
                                         case "religion":
-
+                                        try
+                                        {
                                             religion = updateProvinceStatements[k + 2];
-                                            break;
-                                        case "capital":
+                                        }
+                                        catch
 
-                                            for (int l = 2; l < statement.Length; l++)
-                                            {
-                                                capital += Regex.Replace(statement[k + l], "\"", "") + " ";
-                                            }
-                                            capital.Trim();
+                                        {
+
+                                        }
                                             break;
+                                        
                                         case "trade_goods":
-
+                                   
                                             tradeGood = updateProvinceStatements[k + 2];
                                             break;
                                         case "hre":
@@ -288,7 +310,9 @@ namespace Eu4Parser
                                         case "is_city":
                                             if (updateProvinceStatements[k + 2].Contains("yes"))
                                                 city = true;
-                                            break;
+                                        if (updateProvinceStatements[k + 2].Contains("no"))
+                                            city = false;
+                                        break;
                                         case "	name":
                                             if (updateProvinceStatements[k + 2].Contains( "center_of_trade_modifier"))
                                                 centerOfTrade = true;
@@ -305,17 +329,11 @@ namespace Eu4Parser
                             }
                         }
                     }
-                    catch
-                    {
+                    
+                
 
-                    }
-                }
                
-                if (!city)
-                {
-                    owner = "";
-                    controller = "";
-                }
+                
                 
                 Province province = new Province(id, owner, controller, capital, tradeGood, religion, culture, tax, production, manpower, centerOfTrade, city, hre, coal, fort);
                 provinces.Add(province);

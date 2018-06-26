@@ -69,7 +69,7 @@ namespace Eu4Parser
             FindHREStatus();
             CalculateProvinceNumbers();
             CalculateDevelopment();
-            
+          
             
         }
         public void SetName(string name)
@@ -158,8 +158,9 @@ namespace Eu4Parser
         {
             if (existsIn1444)
                // Console.WriteLine(tag + " " + name + " " + development + " (" + totalTax + ", " + totalProduction + ", " + totalManpower + ") " + primaryCulture + " " + religion + " " + capitalName + " " + techGroup + " " + governmentType + " " + " Exists in 1444 " + existsIn1444 + " In hre " + inHRE);
-              
+           
             Console.WriteLine(tag + " " + name + " " + development + " (" + totalTax + ", " + totalProduction + ", " + totalManpower + ")");
+            
         }
     }
 }
