@@ -33,12 +33,14 @@ namespace Eu4Parser
         public int numberOfForts;
 
         public List<Country> vassals;
+        public List<Country> marches;
         public List<Country> alliances;
         public List<Country> unions;
         public List<Country> tradeLeague;
         public List<Country> royalMarriages;
         public List<Country> tributaries;
         public Country vassalOverlord;
+        public Country marchOverlord;
         public Country unionOverlord;
         public List<Country> guaranteeing;
         public List<Country> guaranteedBy;
@@ -47,10 +49,11 @@ namespace Eu4Parser
         public bool isHREEmperor;
         public bool isCelestialEmperor;
         public bool isTradeLeader;
+
         public Country(string tag, string primaryCulture, string techGroup, string governmentType, 
             string religion, List<Province> provinces, int captialId, int mercantilism)
         {
-
+            marches = new List<Country>();
             vassals = new List<Country>();
             alliances = new List<Country>();
             unions = new List<Country>();
@@ -88,6 +91,10 @@ namespace Eu4Parser
           
           
             
+        }
+        public void AddMarch(Country country)
+        {
+            marches.Add(country);
         }
         public void AddGuarentee(Country country)
         {
@@ -136,6 +143,10 @@ namespace Eu4Parser
         public void SetUnionOverlord(Country country)
         {
             unionOverlord = country;
+        }
+        public void SetMarchOverlord(Country country)
+        {
+            marchOverlord = country;
         }
         public void SetName(string name)
         {
@@ -315,6 +326,21 @@ namespace Eu4Parser
                 }
 
             }
+            if (marches.Count() > 0 || marchOverlord != null)
+            {
+                Console.WriteLine("\tMarches:");
+                foreach (Country country in marches)
+                {
+                    Console.Write("\t\tOverlord of: ");
+                    country.PrintName();
+                }
+                if (marchOverlord != null)
+                {
+                    Console.Write("\t\tMarch under: ");
+                        marchOverlord.PrintName();
+                }
+
+            }
             if (tributaries.Count() > 0 || tributaryOverlord != null)
             {
                 Console.WriteLine("\tTributaries:");
@@ -366,12 +392,12 @@ namespace Eu4Parser
                     Console.WriteLine("\tGuarantees:");
                     foreach (Country country in guaranteeing)
                     {
-                        Console.Write("\tGuaranteeing: ");
+                        Console.Write("\t\tGuaranteeing: ");
                         country.PrintName();
                     }
                     foreach (Country country in guaranteedBy)
                     {
-                        Console.Write("\tGuaranteed By: ");
+                        Console.Write("\t\tGuaranteed By: ");
                         country.PrintName();
                     }
 

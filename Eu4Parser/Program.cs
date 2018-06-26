@@ -518,6 +518,7 @@ namespace Eu4Parser
                         statement[0] == "vassal"||
                         statement[0] == "union"||
                         statement[0] == "dependency"||
+                        statement[0] == "guarantee"||
                         statement[0] == "guarantee")
                     {
 
@@ -703,6 +704,7 @@ namespace Eu4Parser
                                     }
                                     
                                 break;
+
                                 case "royal_marriage":
                                   
                                         firstCountry.AddRoyalMarriage(secondCountry);
@@ -713,6 +715,12 @@ namespace Eu4Parser
 
                                     firstCountry.AddVassel(secondCountry);
                                     secondCountry.SetVassalOverlord(firstCountry);
+
+                                    break;
+                                case "march":
+
+                                    firstCountry.AddMarch(secondCountry);
+                                    secondCountry.SetMarchOverlord(firstCountry);
 
                                     break;
                                 case "union":
