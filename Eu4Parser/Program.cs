@@ -417,11 +417,21 @@ namespace Eu4Parser
                             {
                                
                                string lineHolder = Regex.Replace(line2, @"\t", " ");
-                                
+                                while(lineHolder.Contains("  "))
+                                 lineHolder = Regex.Replace(lineHolder, "  ", " ");
+
+                                lineHolder = Regex.Replace(lineHolder, "{", "");
+                                lineHolder = Regex.Replace(lineHolder, "}", "");
                                 string[] splitLine = lineHolder.Split(' ');
+
+                               
                                 if (splitLine[0] == "color")
                                 {
-                                    country.SetColour(splitLine[3], splitLine[4], splitLine[5]);
+
+                                   
+                                        country.SetColour(splitLine[3], splitLine[4], splitLine[5]);
+                                    
+                                   
 
                                 }
                             }
