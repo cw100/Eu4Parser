@@ -14,25 +14,31 @@ namespace Eu4Parser
 
         static void Main(string[] args)
         {
+            DateTime startDate = new DateTime(1444, 11, 12);
             string path = @"E:\Steam\SteamApps\common\Europa Universalis IV\";
 
             List<Province> provinces = new List<Province>();
-            provinces = LoadProvinces(path);
+            provinces = LoadProvinces(path, startDate);
             provinces = provinces.OrderBy(o => o.id).ToList();
 
-            
+
 
 
             List<Country> countries = new List<Country>();
 
             countries = LoadCountries(path, provinces);
+            //foreach (Country country in countries)
+            //{
+            //    country.Print();
+            //}
+            //foreach (Province province in provinces)
+            //{
+            //    province.Print();
+            //}
+            LoadDiplomacy(path, countries, startDate);
             foreach (Country country in countries)
             {
-                country.Print();
-            }
-            foreach (Province province in provinces)
-           {
-                province.Print();
+                country.PrintDiplomacy();
             }
             Console.Read();
         }
@@ -43,12 +49,12 @@ namespace Eu4Parser
             return result;
         }
 
-        public static List<Province> LoadProvinces(string path)
+        public static List<Province> LoadProvinces(string path,DateTime startDate)
         {
             List<Province> provinces = new List<Province>();
             foreach (string file in Directory.EnumerateFiles(path + @"\history\provinces\", "*.txt"))
             {
-                
+
                 string owner = "";
                 string controller = "";
                 string religion = "";
@@ -80,22 +86,22 @@ namespace Eu4Parser
                     {
                     }
                 }
-                
+
                 string[] lines = File.ReadAllLines(file);
-                for(int i = 0; i<lines.Count();i++)
+                for (int i = 0; i < lines.Count(); i++)
                 {
-                    
-                        lines[i] = Regex.Replace(lines[i], @"\t", " ");
+
+                    lines[i] = Regex.Replace(lines[i], @"\t", " ");
                     while (lines[i].Contains("  "))
                         lines[i] = Regex.Replace(lines[i], "  ", " ");
                     string[] statement = lines[i].Split(' ');
-                   
+
                     switch (statement[0])
                     {
                         case "owner":
-                            if(owner == "")
-                            owner = statement[2].Substring(0, 3);
-                           
+                            if (owner == "")
+                                owner = statement[2].Substring(0, 3);
+
                             break;
                         case "controller":
                             if (controller == "")
@@ -113,8 +119,8 @@ namespace Eu4Parser
                             if (capital == "")
                                 for (int b = 2; b < statement.Length; b++)
                                 {
-                                 
-                                            if (statement[b].Contains("#"))
+
+                                    if (statement[b].Contains("#"))
                                     {
                                         break;
                                     }
@@ -137,7 +143,7 @@ namespace Eu4Parser
                                 if (tax == 0)
                                 {
                                     tax = int.Parse(Regex.Replace(statement[2], "[^.0-9]", ""));
-                                    }
+                                }
                             }
                             catch
                             {
@@ -160,7 +166,7 @@ namespace Eu4Parser
                         case "base_manpower":
                             try
                             {
-                                if (manpower ==0)
+                                if (manpower == 0)
                                 {
                                     manpower = int.Parse(Regex.Replace(statement[2], "[^.0-9]", ""));
                                 }
@@ -171,12 +177,12 @@ namespace Eu4Parser
                             }
                             break;
                         case "is_city":
-                            
+
                             if (statement[2].Trim().Contains("yes"))
                                 city = true;
                             break;
                         case "	name":
-                            if (statement[2].Trim().Contains("center_of_trade_modifier") )
+                            if (statement[2].Trim().Contains("center_of_trade_modifier"))
                                 centerOfTrade = true;
                             break;
                         case "fort_15th":
@@ -188,132 +194,132 @@ namespace Eu4Parser
                     }
                     List<string> updateProvinceStatements = new List<string>();
                     string[] dateString = statement[0].Split('.');
-                        if (dateString[0].StartsWith("1"))
-                        {
-                        DateTime startDate = new DateTime(1444,11, 12);
+                    if (dateString[0].StartsWith("1"))
+                    {
+                        
                         DateTime date = startDate.AddDays(1);
                         try
                         {
-                           
-                             date = new DateTime(int.Parse(Regex.Replace(dateString[0], "[^.0-9]", ""))
-                                 , int.Parse(Regex.Replace(dateString[1], "[^.0-9]", "")), 
-                                 int.Parse(Regex.Replace(dateString[2], "[^.0-9]", "")));
+
+                            date = new DateTime(int.Parse(Regex.Replace(dateString[0], "[^.0-9]", ""))
+                                , int.Parse(Regex.Replace(dateString[1], "[^.0-9]", "")),
+                                int.Parse(Regex.Replace(dateString[2], "[^.0-9]", "")));
                         }
                         catch
                         {
-                           
+
                         }
-                        
-                            
-                            if (date <= startDate)
+
+
+                        if (date <= startDate)
+                        {
+
+                            foreach (String statement2 in lines[i].Split(' ', '{', '}'))
                             {
-                               
-                                foreach (String statement2 in lines[i].Split(' ', '{', '}'))
+                                if (statement2 != "" && statement2 != " ")
                                 {
-                                    if (statement2 != ""&& statement2 != " ")
-                                    {
-                                        updateProvinceStatements.Add(statement2.TrimStart());
-                                    }
+                                    updateProvinceStatements.Add(statement2.TrimStart());
                                 }
-                                for (int j = i+1; j < lines.Count(); j++)
-                                {
+                            }
+                            for (int j = i + 1; j < lines.Count(); j++)
+                            {
 
 
                                 if (!lines[j].StartsWith("}") && !lines[j].StartsWith("1"))
-                                    {
+                                {
 
-                                        foreach (String statement2 in lines[j].Split(' ', '{', '}'))
+                                    foreach (String statement2 in lines[j].Split(' ', '{', '}'))
+                                    {
+                                        if (statement2 != "" && statement2 != " ")
                                         {
-                                            if (statement2 != "" && statement2 != " ")
-                                            {
-                                                updateProvinceStatements.Add(statement2.TrimStart());
-                                            }
+                                            updateProvinceStatements.Add(statement2.TrimStart());
                                         }
-
-                                    }
-                                    else
-                                    {
-                                    break;
                                     }
 
                                 }
-                                for (int k = 0; k<updateProvinceStatements.Count();k++)
+                                else
                                 {
-                                  
-                                    switch (updateProvinceStatements[k].Trim())
-                                    {
-                                        case "owner":
+                                    break;
+                                }
 
-                                            owner = updateProvinceStatements[k+2].Substring(0, 3);
+                            }
+                            for (int k = 0; k < updateProvinceStatements.Count(); k++)
+                            {
 
-                                            
-                                            break;
-                                      
-                                        case "controller":
+                                switch (updateProvinceStatements[k].Trim())
+                                {
+                                    case "owner":
 
-                                            controller = updateProvinceStatements[k + 2].Substring(0, 3);
-                                            break;
-                                        case "culture":
+                                        owner = updateProvinceStatements[k + 2].Substring(0, 3);
 
-                                            culture = updateProvinceStatements[k + 2].Trim();
-                                            break;
-                                        case "religion":
+
+                                        break;
+
+                                    case "controller":
+
+                                        controller = updateProvinceStatements[k + 2].Substring(0, 3);
+                                        break;
+                                    case "culture":
+
+                                        culture = updateProvinceStatements[k + 2].Trim();
+                                        break;
+                                    case "religion":
                                         try
                                         {
                                             religion = Regex.Replace(statement[k + 2], "\"", "").Trim();
-                                         
+
                                         }
                                         catch
 
                                         {
 
                                         }
-                                            break;
-                                        
-                                        case "trade_goods":
-                                   
-                                            tradeGood = updateProvinceStatements[k + 2];
-                                            break;
-                                        case "hre":
-                                            if (updateProvinceStatements[k + 2].Contains("yes"))
-                                                hre = true;
-                                            break;
-                                        case "base_tax":
-                                            try
-                                            {
+                                        break;
 
-                                                tax = int.Parse(Regex.Replace(updateProvinceStatements[k + 2], "[^.0-9]", ""));
+                                    case "trade_goods":
 
-                                            }
-                                            catch
-                                            {
+                                        tradeGood = updateProvinceStatements[k + 2];
+                                        break;
+                                    case "hre":
+                                        if (updateProvinceStatements[k + 2].Contains("yes"))
+                                            hre = true;
+                                        break;
+                                    case "base_tax":
+                                        try
+                                        {
 
-                                            }
-                                            break;
-                                        case "base_production":
-                                            try
-                                            {
+                                            tax = int.Parse(Regex.Replace(updateProvinceStatements[k + 2], "[^.0-9]", ""));
 
-                                                production = int.Parse(Regex.Replace(updateProvinceStatements[k + 2], "[^.0-9]", ""));
+                                        }
+                                        catch
+                                        {
 
-                                            }
-                                            catch
-                                            {
+                                        }
+                                        break;
+                                    case "base_production":
+                                        try
+                                        {
 
-                                            }
-                                            break;
-                                        case "base_manpower":
-                                            try
-                                            {
+                                            production = int.Parse(Regex.Replace(updateProvinceStatements[k + 2], "[^.0-9]", ""));
 
-                                                manpower = int.Parse(Regex.Replace(updateProvinceStatements[k + 2], "[^.0-9]", ""));
+                                        }
+                                        catch
+                                        {
 
-                                            }
-                                            catch
-                                            {
+                                        }
+                                        break;
+                                    case "base_manpower":
+                                        try
+                                        {
 
-                                            }
-                                            break;
+                                            manpower = int.Parse(Regex.Replace(updateProvinceStatements[k + 2], "[^.0-9]", ""));
+
+                                        }
+                                        catch
+                                        {
+
+                                        }
+                                        break;
                                     case "capital":
                                         if (capital == "")
                                             for (int b = 2; b < statement.Length; b++)
@@ -328,33 +334,33 @@ namespace Eu4Parser
 
                                         break;
                                     case "is_city":
-                                            if (updateProvinceStatements[k + 2].Contains("yes"))
-                                                city = true;
+                                        if (updateProvinceStatements[k + 2].Contains("yes"))
+                                            city = true;
                                         if (updateProvinceStatements[k + 2].Contains("no"))
                                             city = false;
                                         break;
-                                        case "	name":
-                                            if (updateProvinceStatements[k + 2].Contains( "center_of_trade_modifier"))
-                                                centerOfTrade = true;
-                                            break;
-                                        case "fort_15th":
-                                            if (updateProvinceStatements[k + 2].Contains("yes"))
-                                                fort = true;
-                                            break;
-                                        default:
-                                            break;
+                                    case "	name":
+                                        if (updateProvinceStatements[k + 2].Contains("center_of_trade_modifier"))
+                                            centerOfTrade = true;
+                                        break;
+                                    case "fort_15th":
+                                        if (updateProvinceStatements[k + 2].Contains("yes"))
+                                            fort = true;
+                                        break;
+                                    default:
+                                        break;
 
-                                    }
                                 }
                             }
                         }
                     }
-                    
-                
+                }
 
-               
-                
-                
+
+
+
+
+
                 Province province = new Province(id, owner, controller, capital, tradeGood, religion, culture, tax, production, manpower, centerOfTrade, city, hre, coal, fort);
                 provinces.Add(province);
             }
@@ -374,8 +380,8 @@ namespace Eu4Parser
             int captialId = 0;
             int mercantilism = 0;
             string[] filePaths = File.ReadAllLines(path + @"\common\country_tags\00_countries.txt");
-           for(int i=0;i<filePaths.Count();i++)
-            { 
+            for (int i = 0; i < filePaths.Count(); i++)
+            {
                 filePaths[i] = Regex.Replace(filePaths[i], @"\t", " ");
             }
             List<Country> countries = new List<Country>();
@@ -384,7 +390,7 @@ namespace Eu4Parser
                 provinces = new List<Province>();
                 string[] lines = File.ReadAllLines(file);
                 tag = Path.GetFileName(file).Split(' ')[0];
-                
+
                 foreach (string line in lines)
                 {
                     string[] statement = line.Split(' ');
@@ -416,7 +422,7 @@ namespace Eu4Parser
                         case "capital":
                             try
                             {
-                                
+
                                 captialId = int.Parse(Regex.Replace(statement[2], "[^.0-9]", ""));
                             }
                             catch
@@ -433,10 +439,10 @@ namespace Eu4Parser
                 {
                     if (province.owner == tag && province.city)
                     {
-                        
-                            provinces.Add(province);
+
+                        provinces.Add(province);
                     }
-                    
+
 
                 }
                 Country country = new Country(tag, primaryCulture, techGroup, governmentType, religion, provinces, captialId, mercantilism);
@@ -444,32 +450,32 @@ namespace Eu4Parser
                 {
                     foreach (string line in filePaths)
                     {
-                       
+
                         if (line.Split(' ')[0] == tag)
                         {
-                        
+
                             string fileName = line.Split('"')[1];
-                            country.SetName(fileName.Substring(10,fileName.Length-14));
+                            country.SetName(fileName.Substring(10, fileName.Length - 14));
                             string[] lines2 = File.ReadAllLines(path + @"\common\" + fileName);
                             foreach (string line2 in lines2)
                             {
-                               
-                               string lineHolder = Regex.Replace(line2, @"\t", " ");
-                                while(lineHolder.Contains("  "))
-                                 lineHolder = Regex.Replace(lineHolder, "  ", " ");
+
+                                string lineHolder = Regex.Replace(line2, @"\t", " ");
+                                while (lineHolder.Contains("  "))
+                                    lineHolder = Regex.Replace(lineHolder, "  ", " ");
 
                                 lineHolder = Regex.Replace(lineHolder, "{", "");
                                 lineHolder = Regex.Replace(lineHolder, "}", "");
                                 string[] splitLine = lineHolder.Split(' ');
 
-                               
+
                                 if (splitLine[0] == "color")
                                 {
 
-                                   
-                                        country.SetColour(splitLine[3], splitLine[4], splitLine[5]);
-                                    
-                                   
+
+                                    country.SetColour(splitLine[3], splitLine[4], splitLine[5]);
+
+
 
                                 }
                             }
@@ -481,6 +487,296 @@ namespace Eu4Parser
             return countries;
 
         }
-     
+
+        public static List<Country> LoadDiplomacy(string path, List<Country> countries, DateTime date)
+        {
+            Country hreEmp=null;
+            Country celestialEmp=null;
+            foreach (string file in Directory.EnumerateFiles(path + @"\history\diplomacy", "*.txt"))
+            {
+
+                string[] lines = File.ReadAllLines(file);
+
+
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    string lineHolder = Regex.Replace(lines[i], @"\t", " ");
+                    while (lineHolder.Contains("  "))
+                        lineHolder = Regex.Replace(lineHolder, "  ", " ");
+
+                    string[] statement = lineHolder.Split(' ');
+                    List<string> endStatement = new List<string>();
+                    string first = "";
+                    string second = "";
+                    bool tradeLeague = false;
+
+                    bool tributary = false;
+                    DateTime startDate = new DateTime(1,1,1) ;
+                    DateTime endDate  = new DateTime(1, 1, 1);
+                    if (statement[0] == "alliance"||
+                        statement[0] == "royal_marriage"||
+                        statement[0] == "vassal"||
+                        statement[0] == "union"||
+                        statement[0] == "dependency"||
+                        statement[0] == "guarantee")
+                    {
+
+                        endStatement = GetStatement(lines, i);
+                        for (int j = 0; j < endStatement.Count(); j++)
+                        {
+                            switch (endStatement[j])
+                            {
+                                case "first":
+                                    first = endStatement[j + 2];
+                                    break;
+                                case "second":
+                                    second = endStatement[j + 2];
+                                    break;
+                                case "start_date":
+                                    string[] dateString = endStatement[j + 2].Split('.');
+                                    if (dateString[0].StartsWith("1"))
+                                    {
+                                        try
+                                        {
+                                            startDate = new DateTime(int.Parse(Regex.Replace(dateString[0], "[^.0-9]", ""))
+                                                , int.Parse(Regex.Replace(dateString[1], "[^.0-9]", "")),
+                                                int.Parse(Regex.Replace(dateString[2], "[^.0-9]", "")));
+                                        }
+                                        catch
+                                        {
+
+                                        }
+                                    }
+                                    break;
+                                case "end_date":
+                                     dateString = endStatement[j + 2].Split('.');
+                                    if (dateString[0].StartsWith("1"))
+                                    {
+
+
+                                        try
+                                        {
+
+                                            endDate = new DateTime(int.Parse(Regex.Replace(dateString[0], "[^.0-9]", ""))
+                                                , int.Parse(Regex.Replace(dateString[1], "[^.0-9]", "")),
+                                                int.Parse(Regex.Replace(dateString[2], "[^.0-9]", "")));
+                                        }
+                                        catch
+                                        {
+
+                                        }
+                                    }
+                                    break;
+                                case "trade_league":
+                                    tradeLeague = true;
+                                    break;
+                                case "subject_type":
+                                    if(endStatement[j+2].Contains("tributary_state"))
+                                    tributary = true;
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        if(statement[0].StartsWith("1"))
+                        {
+                            string[] dateString = statement[0].Split('.');
+                            
+                                try
+                                {
+                                    startDate = new DateTime(int.Parse(Regex.Replace(dateString[0], "[^.0-9]", ""))
+                                        , int.Parse(Regex.Replace(dateString[1], "[^.0-9]", "")),
+                                        int.Parse(Regex.Replace(dateString[2], "[^.0-9]", "")));
+                                if (startDate <= date)
+                                    {
+                                    endStatement = GetStatement(lines, i);
+                                    for (int j = 0; j < endStatement.Count; j++)
+                                    {
+                                       
+                                        switch (endStatement[j])
+                                        {
+                                            case "celestial_emperor":
+                                               
+                                                if (celestialEmp == null)
+                                                {
+                                                    foreach (Country country in countries)
+                                                    {
+                                                        if(country.tag == endStatement[j+2])
+                                                        {
+                                                            country.isCelestialEmperor = true;
+                                                            celestialEmp = country;
+                                                        }
+                                                    }
+
+                                                }
+                                                else
+                                                {
+                                                    foreach (Country country in countries)
+                                                    {
+                                                        if (country.tag == endStatement[j + 2])
+                                                        {
+                                                            country.isCelestialEmperor = true;
+                                                            celestialEmp.isCelestialEmperor = false;
+                                                            celestialEmp = country;
+                                                        }
+                                                    }
+                                                }
+                                                break;
+                                            case "emperor":
+
+                                                if (hreEmp == null)
+                                                {
+                                                    foreach (Country country in countries)
+                                                    {
+                                                        if (country.tag == endStatement[j + 2])
+                                                        {
+                                                            country.isHREEmperor = true;
+                                                            hreEmp = country;
+                                                        }
+                                                    }
+
+                                                }
+                                                else
+                                                {
+                                                    foreach (Country country in countries)
+                                                    {
+                                                        if (country.tag == endStatement[j + 2])
+                                                        {
+                                                            country.isHREEmperor = true;
+                                                            hreEmp.isHREEmperor = false;
+                                                            hreEmp = country;
+                                                        }
+                                                    }
+                                                }
+                                                break;
+                                            default:
+                                                break;
+
+                                        }
+                                    }
+                                }
+                                }
+                                catch
+                                {
+
+                                }
+                            
+                        }
+                    }
+                    if (startDate <= date && date <= endDate)
+                    {
+                        Country firstCountry = null;
+                        Country secondCountry = null;
+                        for (int j = 0; j < countries.Count(); j++)
+                        {
+                            if (countries[j].tag == first)
+                            {
+                                firstCountry = countries[j];
+                            }
+                            if (countries[j].tag == second)
+                            {
+                                secondCountry = countries[j];
+                            }
+                        }
+                        if (firstCountry != null && secondCountry != null)
+                        { 
+                        switch (statement[0])
+                        {
+                            case "alliance":
+                                    if (!tradeLeague)
+                                    {
+                                     firstCountry.AddAlliance(secondCountry);
+                                        secondCountry.AddAlliance(firstCountry);
+                                    }
+                                    else
+
+                                    {
+                                        firstCountry.AddTradeLeagueMember(secondCountry);
+                                        firstCountry.isTradeLeader = true;
+                                        firstCountry.tradeLeagueLeader = firstCountry;
+                                        secondCountry.AddTradeLeagueMember(firstCountry);
+                                        secondCountry.tradeLeagueLeader = firstCountry;
+                                    }
+                                    
+                                break;
+                                case "royal_marriage":
+                                  
+                                        firstCountry.AddRoyalMarriage(secondCountry);
+                                        secondCountry.AddRoyalMarriage(firstCountry);
+                                  
+                                    break;
+                                case "vassal":
+
+                                    firstCountry.AddVassel(secondCountry);
+                                    secondCountry.SetVassalOverlord(firstCountry);
+
+                                    break;
+                                case "union":
+
+                                    firstCountry.AddUnion(secondCountry);
+                                   
+                                    secondCountry.SetUnionOverlord(firstCountry);
+
+                                    break;
+                                case "dependency":
+                                    if(tributary)
+                                    {
+                                        firstCountry.AddTributary(secondCountry);
+                                        secondCountry.SetTributaryOverlord(firstCountry);
+                                    }
+                                    break;
+                                case "guarantee":
+                                    
+                                        firstCountry.AddGuarentee(secondCountry);
+                                        secondCountry.AddGuarenteedBy(firstCountry);
+                                    
+                                    break;
+
+                                default:
+                                break;
+                        }
+                    }
+                    }
+                }
+
+            }
+
+            return countries;
+
+        }
+
+        public static List<string> GetStatement(string[] lines, int startIndex)
+        {
+            List<string> endStatement = new List<string>();
+
+            for (int i = startIndex; i < lines.Length; i++)
+            {
+                string lineHolder = Regex.Replace(lines[i], @"\t", " ");
+                while (lineHolder.Contains("  "))
+                    lineHolder = Regex.Replace(lineHolder, "  ", " ");
+                string[] line = lineHolder.Split(' ');
+                foreach (string s in line)
+                {
+                    if (s != "}")
+                    {
+                        if(s != "{" && s != "")
+                        endStatement.Add(s);
+                    }
+                    else
+
+                    {
+                        return endStatement;
+                    }
+                }
+
+            }
+
+            return endStatement;
+        }
     }
 }
+
