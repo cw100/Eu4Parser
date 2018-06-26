@@ -106,7 +106,12 @@ namespace Eu4Parser
                             break;
                         case "capital":
                             if (capital == "")
-                                capital = Regex.Replace(statement[2], "\"", "");
+                                for (int j = 2; j < statement.Length; j++)
+                                {
+                                    capital += Regex.Replace(statement[j], "\"", "") + " ";
+                                }
+                            capital.Trim();
+                           
                             break;
                         case "trade_goods":
                             if (tradeGood == "")
@@ -178,26 +183,20 @@ namespace Eu4Parser
                         {
                             DateTime date = new DateTime(int.Parse(dateString[0]), int.Parse(dateString[1]), int.Parse(dateString[2]));
                             DateTime startDate = new DateTime(1444, 11, 12);
-
+                            
                             if (date <= startDate)
                             {
                                 List<string> updateProvinceStatements = new List<string>();
-                                for (int j = i; j <= lines.Count(); j++)
-                                {
-                                    if (!lines[j].StartsWith("}"))
+                                foreach (String statement2 in lines[i].Split(' ', '{', '}'))
+                                    updateProvinceStatements.Add(statement2.TrimStart());
+                                for (int j = i+1; j <= lines.Count(); j++)
+                                { 
+                                    if (!(lines[j].Substring(0, 1) == "}") && !(lines[j].Substring(0,1) == "1"))
                                     {
-                                        if (lines[j].Contains("{") && lines[j].Contains("}"))
-                                        {
+                                       
                                             foreach (String statement2 in lines[j].Split(' ','{', '}'))
                                                 updateProvinceStatements.Add(statement2.TrimStart());
-                                            j = lines.Count() + 1;
-                                        }
-                                        else
-                                        {
-                                            foreach (String statement2 in lines[j].Split(' ','{', '}'))
-                                                updateProvinceStatements.Add(statement2.TrimStart());
-                                           
-                                        }
+                                        
 
                                     }
                                     else
@@ -206,48 +205,55 @@ namespace Eu4Parser
                                     }
 
                                 }
-                                for (int k = 0; k<updateProvinceStatements.Count();k++)
+                                for (int k = 0; k<=updateProvinceStatements.Count();k++)
                                 {
-                                   
-                                  
-                                        switch (updateProvinceStatements[k].Trim())
+
+                                    if (owner == "MNG")
+                                    {
+                                        var asd = 0;
+                                    }
+                                    switch (updateProvinceStatements[k].Trim())
                                     {
                                         case "owner":
 
-                                            owner = updateProvinceStatements[k+2].Trim().Substring(0, 3);
+                                            owner = updateProvinceStatements[k+2].Substring(0, 3);
 
                                             
                                             break;
                                       
                                         case "controller":
 
-                                            controller = updateProvinceStatements[k + 2].Trim().Substring(0, 3);
+                                            controller = updateProvinceStatements[k + 2].Substring(0, 3);
                                             break;
                                         case "culture":
 
-                                            culture = updateProvinceStatements[k + 2].Trim();
+                                            culture = updateProvinceStatements[k + 2];
                                             break;
                                         case "religion":
 
-                                            religion = updateProvinceStatements[k + 2].Trim();
+                                            religion = updateProvinceStatements[k + 2];
                                             break;
                                         case "capital":
-                                            
-                                            capital = Regex.Replace(updateProvinceStatements[k + 2].Trim(), "\"", "");
+
+                                            for (int l = 2; l < statement.Length; l++)
+                                            {
+                                                capital += Regex.Replace(statement[k + l], "\"", "") + " ";
+                                            }
+                                            capital.Trim();
                                             break;
                                         case "trade_goods":
 
-                                            tradeGood = updateProvinceStatements[k + 2].Trim();
+                                            tradeGood = updateProvinceStatements[k + 2];
                                             break;
                                         case "hre":
-                                            if (updateProvinceStatements[k + 2].Trim().Contains("yes"))
+                                            if (updateProvinceStatements[k + 2].Contains("yes"))
                                                 hre = true;
                                             break;
                                         case "base_tax":
                                             try
                                             {
 
-                                                tax = int.Parse(Regex.Replace(updateProvinceStatements[k + 2].Trim(), "[^.0-9]", ""));
+                                                tax = int.Parse(Regex.Replace(updateProvinceStatements[k + 2], "[^.0-9]", ""));
 
                                             }
                                             catch
@@ -259,7 +265,7 @@ namespace Eu4Parser
                                             try
                                             {
 
-                                                production = int.Parse(Regex.Replace(updateProvinceStatements[k + 2].Trim(), "[^.0-9]", ""));
+                                                production = int.Parse(Regex.Replace(updateProvinceStatements[k + 2], "[^.0-9]", ""));
 
                                             }
                                             catch
@@ -271,7 +277,7 @@ namespace Eu4Parser
                                             try
                                             {
 
-                                                manpower = int.Parse(Regex.Replace(updateProvinceStatements[k + 2].Trim(), "[^.0-9]", ""));
+                                                manpower = int.Parse(Regex.Replace(updateProvinceStatements[k + 2], "[^.0-9]", ""));
 
                                             }
                                             catch
@@ -330,17 +336,17 @@ namespace Eu4Parser
             int captialId = 0;
             int mercantilism = 0;
             string[] filePaths = File.ReadAllLines(path + @"\common\country_tags\00_countries.txt");
+           for(int i=0;i<filePaths.Count();i++)
+            { 
+                filePaths[i] = Regex.Replace(filePaths[i], @"\t", " ");
+            }
             List<Country> countries = new List<Country>();
             foreach (string file in Directory.EnumerateFiles(path + @"\history\countries\", "*.txt"))
             {
                 provinces = new List<Province>();
                 string[] lines = File.ReadAllLines(file);
                 tag = Path.GetFileName(file).Split(' ')[0];
-                name = Path.GetFileName(file).Split(' ')[2].Split('.')[0];
-                if(name == "-")
-                {
-                    name = Path.GetFileName(file).Split(' ')[3].Split('.')[0]; //Pangasinan work around 
-                }
+                
                 foreach (string line in lines)
                 {
                     string[] statement = line.Split(' ');
@@ -395,21 +401,27 @@ namespace Eu4Parser
                     
 
                 }
-                Country country = new Country(tag, name, primaryCulture, techGroup, governmentType, religion, provinces, captialId, mercantilism);
-                if (name != "")
+                Country country = new Country(tag, primaryCulture, techGroup, governmentType, religion, provinces, captialId, mercantilism);
+                if (tag != "")
                 {
                     foreach (string line in filePaths)
                     {
+                       
                         if (line.Split(' ')[0] == tag)
                         {
-                            
+                        
                             string fileName = line.Split('"')[1];
+                            country.SetName(fileName.Substring(10,fileName.Length-14));
                             string[] lines2 = File.ReadAllLines(path + @"\common\" + fileName);
                             foreach (string line2 in lines2)
                             {
-                                if (line2.Split(' ')[0] == "color")
+                               
+                               string lineHolder = Regex.Replace(line2, @"\t", " ");
+                                
+                                string[] splitLine = lineHolder.Split(' ');
+                                if (splitLine[0] == "color")
                                 {
-                                    country.SetColour(line2.Split(' ')[3], line2.Split(' ')[4], line2.Split(' ')[5]);
+                                    country.SetColour(splitLine[3], splitLine[4], splitLine[5]);
 
                                 }
                             }

@@ -44,11 +44,11 @@ namespace Eu4Parser
         public int numberOfForts;
 
 
-        public Country(string tag, string name, string primaryCulture, string techGroup, string governmentType, 
+        public Country(string tag, string primaryCulture, string techGroup, string governmentType, 
             string religion, List<Province> provinces, int captialId, int mercantilism)
         {
             this.tag = tag;
-            this.name = name;
+           
             this.primaryCulture = primaryCulture;
             this.techGroup = techGroup;
             this.governmentType = governmentType;
@@ -70,6 +70,11 @@ namespace Eu4Parser
             CalculateProvinceNumbers();
             CalculateDevelopment();
             
+            
+        }
+        public void SetName(string name)
+        {
+            this.name = name;
         }
         public void SetColour(string r, string g, string b)
         {
