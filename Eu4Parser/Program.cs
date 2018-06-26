@@ -14,7 +14,7 @@ namespace Eu4Parser
 
         static void Main(string[] args)
         {
-            string path = @"E:\Steam\SteamApps\common\Europa Universalis IV";
+            string path = @"E:\Steam\SteamApps\common\Europa Universalis IV\";
 
             List<Province> provinces = new List<Province>();
             provinces = LoadProvinces(path);
@@ -47,6 +47,7 @@ namespace Eu4Parser
             List<Province> provinces = new List<Province>();
             foreach (string file in Directory.EnumerateFiles(path + @"\history\provinces\", "*.txt"))
             {
+                
                 string owner = "";
                 string controller = "";
                 string religion = "";
@@ -78,38 +79,50 @@ namespace Eu4Parser
                     {
                     }
                 }
+                
                 string[] lines = File.ReadAllLines(file);
-                foreach (string line in lines)
+                for(int i = 0; i<lines.Count();i++)
                 {
-                    string[] statement = line.Split(' ');
+                     
+                    string[] statement = lines[i].Split(' ');
                     switch (statement[0])
                     {
                         case "owner":
+                            if(owner == "")
                             owner = statement[2].Substring(0, 3);
+                           
                             break;
                         case "controller":
-                            controller = statement[2].Substring(0, 3);
+                            if (controller == "")
+                                controller = statement[2].Substring(0, 3);
                             break;
                         case "culture":
-                            culture = statement[2];
+                            if (culture == "")
+                                culture = statement[2];
                             break;
                         case "religion":
-                            religion = statement[2];
+                            if (religion == "")
+                                religion = statement[2];
                             break;
                         case "capital":
-                            capital = Regex.Replace(statement[2], "\"", "");
+                            if (capital == "")
+                                capital = Regex.Replace(statement[2], "\"", "");
                             break;
                         case "trade_goods":
-                            tradeGood = statement[2];
+                            if (tradeGood == "")
+                                tradeGood = statement[2];
                             break;
                         case "hre":
-                            if (statement[2] == "yes")
+                            if (statement[2].Trim().Contains("yes"))
                                 hre = true;
                             break;
                         case "base_tax":
                             try
                             {
-                                tax = int.Parse(Regex.Replace(statement[2], "[^.0-9]", ""));
+                                if (tax == 0)
+                                {
+                                    tax = int.Parse(Regex.Replace(statement[2], "[^.0-9]", ""));
+                                    }
                             }
                             catch
                             {
@@ -119,7 +132,10 @@ namespace Eu4Parser
                         case "base_production":
                             try
                             {
-                                production = int.Parse(Regex.Replace(statement[2], "[^.0-9]", ""));
+                                if (production == 0)
+                                {
+                                    production = int.Parse(Regex.Replace(statement[2], "[^.0-9]", ""));
+                                }
                             }
                             catch
                             {
@@ -129,7 +145,10 @@ namespace Eu4Parser
                         case "base_manpower":
                             try
                             {
-                                manpower = int.Parse(Regex.Replace(statement[2], "[^.0-9]", ""));
+                                if (manpower ==0)
+                                {
+                                    manpower = int.Parse(Regex.Replace(statement[2], "[^.0-9]", ""));
+                                }
                             }
                             catch
                             {
@@ -137,26 +156,167 @@ namespace Eu4Parser
                             }
                             break;
                         case "is_city":
-                            if (statement[2] == "yes")
+                            
+                            if (statement[2].Trim().Contains("yes"))
                                 city = true;
                             break;
                         case "	name":
-                            if (statement[2] == "center_of_trade_modifier")
+                            if (statement[2].Trim().Contains("center_of_trade_modifier") )
                                 centerOfTrade = true;
                             break;
                         case "fort_15th":
-                            if (statement[2] == "yes")
+                            if (statement[2].Trim().Contains("yes"))
                                 fort = true;
                             break;
                         default:
                             break;
                     }
+                    try
+                    {
+                        string[] dateString = statement[0].Split('.');
+                        if (dateString[0].StartsWith("1"))
+                        {
+                            DateTime date = new DateTime(int.Parse(dateString[0]), int.Parse(dateString[1]), int.Parse(dateString[2]));
+                            DateTime startDate = new DateTime(1444, 11, 12);
+
+                            if (date <= startDate)
+                            {
+                                List<string> updateProvinceStatements = new List<string>();
+                                for (int j = i; j <= lines.Count(); j++)
+                                {
+                                    if (!lines[j].StartsWith("}"))
+                                    {
+                                        if (lines[j].Contains("{") && lines[j].Contains("}"))
+                                        {
+                                            foreach (String statement2 in lines[j].Split(' ','{', '}'))
+                                                updateProvinceStatements.Add(statement2.TrimStart());
+                                            j = lines.Count() + 1;
+                                        }
+                                        else
+                                        {
+                                            foreach (String statement2 in lines[j].Split(' ','{', '}'))
+                                                updateProvinceStatements.Add(statement2.TrimStart());
+                                           
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        j = lines.Count() + 1;
+                                    }
+
+                                }
+                                for (int k = 0; k<updateProvinceStatements.Count();k++)
+                                {
+                                   
+                                  
+                                        switch (updateProvinceStatements[k].Trim())
+                                    {
+                                        case "owner":
+
+                                            owner = updateProvinceStatements[k+2].Trim().Substring(0, 3);
+
+                                            
+                                            break;
+                                      
+                                        case "controller":
+
+                                            controller = updateProvinceStatements[k + 2].Trim().Substring(0, 3);
+                                            break;
+                                        case "culture":
+
+                                            culture = updateProvinceStatements[k + 2].Trim();
+                                            break;
+                                        case "religion":
+
+                                            religion = updateProvinceStatements[k + 2].Trim();
+                                            break;
+                                        case "capital":
+                                            
+                                            capital = Regex.Replace(updateProvinceStatements[k + 2].Trim(), "\"", "");
+                                            break;
+                                        case "trade_goods":
+
+                                            tradeGood = updateProvinceStatements[k + 2].Trim();
+                                            break;
+                                        case "hre":
+                                            if (updateProvinceStatements[k + 2].Trim().Contains("yes"))
+                                                hre = true;
+                                            break;
+                                        case "base_tax":
+                                            try
+                                            {
+
+                                                tax = int.Parse(Regex.Replace(updateProvinceStatements[k + 2].Trim(), "[^.0-9]", ""));
+
+                                            }
+                                            catch
+                                            {
+
+                                            }
+                                            break;
+                                        case "base_production":
+                                            try
+                                            {
+
+                                                production = int.Parse(Regex.Replace(updateProvinceStatements[k + 2].Trim(), "[^.0-9]", ""));
+
+                                            }
+                                            catch
+                                            {
+
+                                            }
+                                            break;
+                                        case "base_manpower":
+                                            try
+                                            {
+
+                                                manpower = int.Parse(Regex.Replace(updateProvinceStatements[k + 2].Trim(), "[^.0-9]", ""));
+
+                                            }
+                                            catch
+                                            {
+
+                                            }
+                                            break;
+                                        case "is_city":
+                                            if (updateProvinceStatements[k + 2].Contains("yes"))
+                                                city = true;
+                                            break;
+                                        case "	name":
+                                            if (updateProvinceStatements[k + 2].Contains( "center_of_trade_modifier"))
+                                                centerOfTrade = true;
+                                            break;
+                                        case "fort_15th":
+                                            if (updateProvinceStatements[k + 2].Contains("yes"))
+                                                fort = true;
+                                            break;
+                                        default:
+                                            break;
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+
+                    }
                 }
+               
+                if (!city)
+                {
+                    owner = "";
+                    controller = "";
+                }
+                
                 Province province = new Province(id, owner, controller, capital, tradeGood, religion, culture, tax, production, manpower, centerOfTrade, city, hre, coal, fort);
                 provinces.Add(province);
             }
             return provinces;
         }
+
 
         public static List<Country> LoadCountries(string path, List<Province> allProvinces)
         {
@@ -179,7 +339,7 @@ namespace Eu4Parser
                 name = Path.GetFileName(file).Split(' ')[2].Split('.')[0];
                 if(name == "-")
                 {
-                    name = Path.GetFileName(file).Split(' ')[3].Split('.')[0];
+                    name = Path.GetFileName(file).Split(' ')[3].Split('.')[0]; //Pangasinan work around 
                 }
                 foreach (string line in lines)
                 {
@@ -227,10 +387,13 @@ namespace Eu4Parser
 
                 foreach (Province province in allProvinces)
                 {
-                    if (province.owner == tag)
+                    if (province.owner == tag && province.city)
                     {
-                        provinces.Add(province);
+                        
+                            provinces.Add(province);
                     }
+                    
+
                 }
                 Country country = new Country(tag, name, primaryCulture, techGroup, governmentType, religion, provinces, captialId, mercantilism);
                 if (name != "")

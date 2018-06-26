@@ -40,6 +40,8 @@ namespace Eu4Parser
         public bool existsIn1444;
         public bool inHRE;
 
+        public Dictionary<string, int> numberOfTradeGoods;
+        public int numberOfForts;
 
 
         public Country(string tag, string name, string primaryCulture, string techGroup, string governmentType, 
@@ -62,9 +64,12 @@ namespace Eu4Parser
             totalTax = 0;
             totalProduction = 0;
             totalManpower = 0;
-            CalculateDevelopment();
+           
             FindCapitalName();
-            FindHREStatus(); 
+            FindHREStatus();
+            CalculateProvinceNumbers();
+            CalculateDevelopment();
+            
         }
         public void SetColour(string r, string g, string b)
         {
@@ -77,15 +82,52 @@ namespace Eu4Parser
 
             }
         }
+        void CalculateProvinceNumbers()
+        {
+            numberOfTradeGoods = new Dictionary<string, int>();
+
+            numberOfForts = 0;
+            foreach (Province province in provinces)
+            {
+                if (!numberOfTradeGoods.ContainsKey(province.tradeGood))
+                {
+                    numberOfTradeGoods.Add(province.tradeGood, 1);
+                }
+                else
+                {
+                    numberOfTradeGoods[province.tradeGood]++;
+                }
+                if (province.coal)
+                {
+                    if (!numberOfTradeGoods.ContainsKey("coal"))
+                    {
+                        numberOfTradeGoods.Add("coal", 1);
+                    }
+                    else
+                    {
+                        numberOfTradeGoods["coal"]++;
+                    }
+                }
+                if (province.fort)
+                {
+                    numberOfForts++;
+                }
+            }
+        }
         void CalculateDevelopment()
         {
-            foreach(Province province in provinces)
+            foreach (Province province in provinces)
             {
-                development += province.development;
-                totalTax += province.tax;
-                totalProduction += province.production;
-                totalManpower += province.manpower;
+                if (province.city)
+                {
+                    development += province.development;
+                    totalTax += province.tax;
+                    totalProduction += province.production;
+                    totalManpower += province.manpower;
+                }
+                
             }
+           
         }
         void FindCapitalName()
         {
@@ -109,8 +151,9 @@ namespace Eu4Parser
         }
         public void Print()
         {
-            //Console.WriteLine(tag + " " + name + " " + development + " (" + totalTax + ", " + totalProduction + ", " + totalManpower + ") " + primaryCulture + " " + religion + " " + capitalName + " " + techGroup + " " + governmentType + " " + " Exists in 1444 " + existsIn1444 + " In hre " + inHRE);
-            if(existsIn1444)
+            if (existsIn1444)
+               // Console.WriteLine(tag + " " + name + " " + development + " (" + totalTax + ", " + totalProduction + ", " + totalManpower + ") " + primaryCulture + " " + religion + " " + capitalName + " " + techGroup + " " + governmentType + " " + " Exists in 1444 " + existsIn1444 + " In hre " + inHRE);
+              
             Console.WriteLine(tag + " " + name + " " + development + " (" + totalTax + ", " + totalProduction + ", " + totalManpower + ")");
         }
     }
