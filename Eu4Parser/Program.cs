@@ -658,13 +658,13 @@ namespace Eu4Parser
                                                 monarchName = "";
                                                 for (int k = j + 1; k < endStatement.Count; k++)
                                                 {
-                                                if (!endStatement[k].Contains("#")&& !endStatement[k].Contains("\r")&& !endStatement[k].Contains("birth_date="))
+                                                if (!endStatement[k].Contains("#") && !endStatement[k].Contains("\r") && !endStatement[k].Contains("birth_date=") && !endStatement[k].Contains("adm="))
                                                 {
                                                     monarchName += Regex.Replace(endStatement[k], "\"", "") + " ";
                                                 }
-                                                    if (endStatement[k].EndsWith("\"")|| endStatement[k].Contains("#") || endStatement[k].Contains("\r")|| endStatement[k].Contains("birth_date="))
+                                                if (endStatement[k].EndsWith("\"") || endStatement[k].Contains("#") || endStatement[k].Contains("\r") || endStatement[k].Contains("birth_date=") || endStatement[k].Contains("adm="))
                                                 {
-                                                        monarchName = monarchName.Trim();
+                                                    monarchName = monarchName.Trim();
                                                         break;
                                                     }
 
@@ -677,11 +677,11 @@ namespace Eu4Parser
                                             heirName = "";
                                             for (int k = j + 1; k < endStatement.Count; k++)
                                             {
-                                                if (!endStatement[k].Contains("#") && !endStatement[k].Contains("\r") && !endStatement[k].Contains("birth_date="))
+                                                if (!endStatement[k].Contains("#") && !endStatement[k].Contains("\r") && !endStatement[k].Contains("birth_date=") && !endStatement[k].Contains("adm="))
                                                 {
                                                     heirName += Regex.Replace(endStatement[k], "\"", "") + " ";
                                                 }
-                                                if (endStatement[k].EndsWith("\"") || endStatement[k].Contains("#") || endStatement[k].Contains("\r") || endStatement[k].Contains("birth_date="))
+                                                if (endStatement[k].EndsWith("\"") || endStatement[k].Contains("#") || endStatement[k].Contains("\r") || endStatement[k].Contains("birth_date=") || endStatement[k].Contains("adm="))
                                                 {
                                                     heirName = heirName.Trim();
                                                     break;
@@ -729,11 +729,11 @@ namespace Eu4Parser
                                             monarchDynasty = "";
                                             for (int k = j + 1; k < endStatement.Count; k++)
                                             {
-                                                if (!endStatement[k].Contains("#") && !endStatement[k].Contains("\r") && !endStatement[k].Contains("birth_date="))
+                                                if (!endStatement[k].Contains("#") && !endStatement[k].Contains("\r") && !endStatement[k].Contains("birth_date=") && !endStatement[k].Contains("adm="))
                                                 {
                                                     monarchDynasty += Regex.Replace(endStatement[k], "\"", "") + " ";
                                                 }
-                                                if (endStatement[k].EndsWith("\"") || endStatement[k].Contains("#") || endStatement[k].Contains("\r") || endStatement[k].Contains("birth_date="))
+                                                if (endStatement[k].EndsWith("\"") || endStatement[k].Contains("#") || endStatement[k].Contains("\r") || endStatement[k].Contains("birth_date=") || endStatement[k].Contains("adm="))
                                                 {
                                                     monarchDynasty = monarchDynasty.Trim();
                                                     break;
@@ -747,11 +747,11 @@ namespace Eu4Parser
                                             heirDynasty = "";
                                             for (int k = j + 1; k < endStatement.Count; k++)
                                             {
-                                                if (!endStatement[k].Contains("#") && !endStatement[k].Contains("\r") && !endStatement[k].Contains("birth_date="))
+                                                if (!endStatement[k].Contains("#") && !endStatement[k].Contains("\r") && !endStatement[k].Contains("birth_date=") && !endStatement[k].Contains("adm="))
                                                 {
                                                     heirDynasty += Regex.Replace(endStatement[k], "\"", "") + " ";
                                                 }
-                                                if (endStatement[k].EndsWith("\"") || endStatement[k].Contains("#") || endStatement[k].Contains("\r") || endStatement[k].Contains("birth_date="))
+                                                if (endStatement[k].EndsWith("\"") || endStatement[k].Contains("#") || endStatement[k].Contains("\r") || endStatement[k].Contains("birth_date=") || endStatement[k].Contains("adm="))
                                                 {
                                                     heirDynasty = heirDynasty.Trim();
                                                     break;
