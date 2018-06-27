@@ -28,7 +28,6 @@ namespace Eu4Parser
         public int mercantilism;
         public bool existsInCurrentDate;
         public bool inHRE;
-        public int fortLevel;
         public Dictionary<string, int> numberOfTradeGoods;
         public int numberOfForts;
         public List<Province> cores;
@@ -49,10 +48,12 @@ namespace Eu4Parser
         public bool isHREEmperor;
         public bool isCelestialEmperor;
         public bool isTradeLeader;
-
+        public Monarch monarch, heir;
         public Country(string tag, string primaryCulture, string techGroup, string governmentType, 
-            string religion, List<Province> provinces, int captialId, int mercantilism )
+            string religion, List<Province> provinces, int captialId, int mercantilism , Monarch monarch, Monarch heir)
         {
+            this.monarch = monarch;
+            this.heir = heir;
             marches = new List<Country>();
             vassals = new List<Country>();
             alliances = new List<Country>();
@@ -427,6 +428,17 @@ namespace Eu4Parser
 
         }
 
+        public void PrintMonarchs()
+        {
+            if (existsInCurrentDate)
+            {
+                PrintName(false);
+                Console.Write("\t");
+                monarch.Print();
+                Console.Write("\t");
+                heir.Print();
+            }
+        }
         public void PrintCores()
         {
             PrintName(false);

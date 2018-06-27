@@ -26,7 +26,7 @@ namespace Eu4Parser
 
             List<Country> countries = new List<Country>();
 
-            countries = LoadCountries(path, provinces);
+            countries = LoadCountries(path, provinces,startDate);
             //foreach (Country country in countries)
             //{
             //    country.Print();
@@ -48,7 +48,7 @@ namespace Eu4Parser
             }
             foreach (Country country in countries)
             {
-                country.PrintCores();
+                country.PrintMonarchs();
             }
             Console.Read();
         }
@@ -479,17 +479,38 @@ namespace Eu4Parser
         }
 
 
-        public static List<Country> LoadCountries(string path, List<Province> allProvinces)
+        public static List<Country> LoadCountries(string path, List<Province> allProvinces, DateTime date)
         {
             List<Province> provinces = new List<Province>(); ;
             string tag = "";
-            string name = "";
+            
             string primaryCulture = "";
             string techGroup = "";
             string governmentType = "";
             string religion = "";
             int captialId = 0;
-            int mercantilism = 0;
+           int mercantilism = 0;
+            Monarch monarch;
+            Monarch heir;
+            string monarchName = "";
+            string heirName = "";
+            string monarchMonarchName = "";
+            string heirMonarchName = "";
+            string monarchDynasty = "";
+            string heirDynasty="";
+            int monarchAdm = 0;
+            int monarchDip = 0;
+            int monarchMil =0;
+            int heirAdm = 0;
+            int heirDip = 0;
+            int heirMil =0;
+            bool monarchToggle=false;
+            bool leaderToggle = false;
+
+            bool monarchFemale = false;
+            bool monarchRegent = false;
+            bool heirFemale = false;
+            bool heirRegent = false;
             string[] filePaths = File.ReadAllLines(path + @"\common\country_tags\00_countries.txt");
             for (int i = 0; i < filePaths.Count(); i++)
             {
@@ -498,51 +519,335 @@ namespace Eu4Parser
             List<Country> countries = new List<Country>();
             foreach (string file in Directory.EnumerateFiles(path + @"\history\countries\", "*.txt"))
             {
+                DateTime lastDate = new DateTime(1,1,1);
+                 primaryCulture = "";
+                 techGroup = "";
+                 governmentType = "";
+                 religion = "";
+                 mercantilism = 0;
                 provinces = new List<Province>();
                 string[] lines = File.ReadAllLines(file);
                 tag = Path.GetFileName(file).Split(' ')[0];
+                monarchName = "";
+                heirName = "";
+                monarchMonarchName = "";
+                heirMonarchName = "";
+                monarchDynasty = "";
+                heirDynasty = "";
+                monarchAdm = 0;
+                monarchDip = 0;
+                monarchMil = 0;
+                heirAdm = 0;
+                heirDip = 0;
+                heirMil = 0;
+                monarchToggle = false;
+                leaderToggle = false;
 
-                foreach (string line in lines)
+                monarchFemale = false;
+                monarchRegent = false;
+                heirFemale = false;
+                heirRegent = false;
+                for (int i = 0; i < lines.Length; i++)
                 {
-                    string[] statement = line.Split(' ');
-                    switch (statement[0])
+
+                     
+                    string[] statement = lines[i].Split(' ');
+                    if (!statement[0].StartsWith("1"))
+                        {
+                        switch (statement[0])
+                        {
+                            case "primary_culture":
+                                primaryCulture = statement[2];
+                                break;
+                            case "government":
+                                governmentType = statement[2];
+                                break;
+                            case "mercantilism":
+                                try
+                                {
+                                    mercantilism = int.Parse(Regex.Replace(statement[2], "[^.0-9]", ""));
+                                }
+                                catch
+                                {
+
+                                }
+                                break;
+                            case "technology_group":
+                                techGroup = statement[2];
+                                break;
+                            case "religion":
+                                religion = statement[2];
+                                break;
+
+                            case "capital":
+                                try
+                                {
+
+                                    captialId = int.Parse(Regex.Replace(statement[2], "[^.0-9]", ""));
+                                }
+                                catch
+                                {
+                                }
+                                break;
+
+                            default:
+                                break;
+                        }
+                    }
+                    else
                     {
-                        case "primary_culture":
-                            primaryCulture = statement[2];
-                            break;
-                        case "government":
-                            governmentType = statement[2];
-                            break;
-                        case "mercantilism":
-                            try
-                            {
-                                mercantilism = int.Parse(Regex.Replace(statement[2], "[^.0-9]", ""));
-                            }
-                            catch
-                            {
+                        string[] dateString = statement[0].Split('.');
+                        
+                       
+                      
+                            DateTime thisDate = new DateTime(int.Parse(Regex.Replace(dateString[0], "[^.0-9]", ""))
+                                , int.Parse(Regex.Replace(dateString[1], "[^.0-9]", "")),
+                                int.Parse(Regex.Replace(dateString[2], "[^.0-9]", "")));
+                        if (lastDate == new DateTime(1, 1, 1))
+                        {
+                            lastDate = thisDate;
 
-                            }
-                            break;
-                        case "technology_group":
-                            techGroup = statement[2];
-                            break;
-                        case "religion":
-                            religion = statement[2];
-                            break;
-
-                        case "capital":
-                            try
+                        }
+                       
+                        if (thisDate <= date)
                             {
-
-                                captialId = int.Parse(Regex.Replace(statement[2], "[^.0-9]", ""));
-                            }
-                            catch
+                                List<string> endStatement = GetStatement(lines, i);
+                            
+                            if (lastDate != thisDate && endStatement[1]!= "leader=")
                             {
-                            }
-                            break;
+                                monarchName = "";
+                                heirName = "";
+                                monarchMonarchName = "";
+                                heirMonarchName = "";
+                                monarchDynasty = "";
+                                heirDynasty = "";
+                                monarchAdm = 0;
+                                monarchDip = 0;
+                                monarchMil = 0;
+                                heirAdm = 0;
+                                heirDip = 0;
+                                heirMil = 0;
+                                monarchToggle = false;
+                                leaderToggle = false;
 
-                        default:
-                            break;
+                                monarchFemale = false;
+                                monarchRegent = false;
+                                heirFemale = false;
+                                heirRegent = false;
+                                lastDate = thisDate;
+                            }
+                            for (int j = 0; j < endStatement.Count; j++)
+                                {
+
+                                    switch (endStatement[j])
+                                    {
+                                        case "monarch=":
+                                            monarchToggle = true;
+                                            leaderToggle = false;
+                                            break;
+                                        case "heir=":
+                                            monarchToggle = false;
+                                            leaderToggle = false;
+                                            break;
+                                        case "leader=":
+                                            leaderToggle = true;
+                                                break;
+                                        case "name=":
+                                            if(monarchToggle&&!leaderToggle)
+                                            {
+                                                monarchName = "";
+                                                for (int k = j + 1; k < endStatement.Count; k++)
+                                                {
+                                                if (!endStatement[k].Contains("#")&& !endStatement[k].Contains("\r")&& !endStatement[k].Contains("birth_date="))
+                                                {
+                                                    monarchName += Regex.Replace(endStatement[k], "\"", "") + " ";
+                                                }
+                                                    if (endStatement[k].EndsWith("\"")|| endStatement[k].Contains("#") || endStatement[k].Contains("\r")|| endStatement[k].Contains("birth_date="))
+                                                {
+                                                        monarchName = monarchName.Trim();
+                                                        break;
+                                                    }
+
+                                                }
+                                               
+                                            }
+                                            if (!monarchToggle && !leaderToggle)
+                                            {
+                                               
+                                            heirName = "";
+                                            for (int k = j + 1; k < endStatement.Count; k++)
+                                            {
+                                                if (!endStatement[k].Contains("#") && !endStatement[k].Contains("\r") && !endStatement[k].Contains("birth_date="))
+                                                {
+                                                    heirName += Regex.Replace(endStatement[k], "\"", "") + " ";
+                                                }
+                                                if (endStatement[k].EndsWith("\"") || endStatement[k].Contains("#") || endStatement[k].Contains("\r") || endStatement[k].Contains("birth_date="))
+                                                {
+                                                    heirName = heirName.Trim();
+                                                    break;
+                                                }
+
+                                            }
+                                        }
+                                            break;
+                                        case "monarch_name=":
+                                            if (monarchToggle && !leaderToggle)
+                                            {
+                                                monarchMonarchName = "";
+                                                for (int k = j +1; k < endStatement.Count; k++)
+                                                {
+
+                                                    monarchMonarchName += Regex.Replace(endStatement[k], "\"", "") + " ";
+                                                    if (endStatement[k].EndsWith("\""))
+                                                    {
+                                                        monarchMonarchName = monarchMonarchName.Trim();
+                                                        break;
+                                                    }
+
+                                                }
+                                            }
+                                            if (!monarchToggle && !leaderToggle)
+                                            {
+                                                heirMonarchName = "";
+                                                for (int k = j +1; k < endStatement.Count; k++)
+                                                {
+
+                                                    heirMonarchName += Regex.Replace(endStatement[k], "\"", "") + " ";
+                                                    if (endStatement[k].EndsWith("\""))
+                                                    {
+                                                        heirMonarchName = heirMonarchName.Trim();
+                                                        break;
+                                                    }
+
+                                                }
+                                            }
+                                            break;
+                                        case "dynasty=":
+                                            if (monarchToggle && !leaderToggle)
+                                            {
+                                               
+                                            monarchDynasty = "";
+                                            for (int k = j + 1; k < endStatement.Count; k++)
+                                            {
+                                                if (!endStatement[k].Contains("#") && !endStatement[k].Contains("\r") && !endStatement[k].Contains("birth_date="))
+                                                {
+                                                    monarchDynasty += Regex.Replace(endStatement[k], "\"", "") + " ";
+                                                }
+                                                if (endStatement[k].EndsWith("\"") || endStatement[k].Contains("#") || endStatement[k].Contains("\r") || endStatement[k].Contains("birth_date="))
+                                                {
+                                                    monarchDynasty = monarchDynasty.Trim();
+                                                    break;
+                                                }
+
+                                            }
+                                        }
+                                            if (!monarchToggle && !leaderToggle)
+                                            {
+                                                
+                                            heirDynasty = "";
+                                            for (int k = j + 1; k < endStatement.Count; k++)
+                                            {
+                                                if (!endStatement[k].Contains("#") && !endStatement[k].Contains("\r") && !endStatement[k].Contains("birth_date="))
+                                                {
+                                                    heirDynasty += Regex.Replace(endStatement[k], "\"", "") + " ";
+                                                }
+                                                if (endStatement[k].EndsWith("\"") || endStatement[k].Contains("#") || endStatement[k].Contains("\r") || endStatement[k].Contains("birth_date="))
+                                                {
+                                                    heirDynasty = heirDynasty.Trim();
+                                                    break;
+                                                }
+
+                                            }
+                                        }
+                                            break;
+                                        case "adm=":
+                                            if (monarchToggle && !leaderToggle)
+                                            {
+                                                monarchAdm = int.Parse(endStatement[j + 1]);
+                                            }
+                                            if (!monarchToggle && !leaderToggle)
+                                            {
+                                                heirAdm = int.Parse(endStatement[j + 1]);
+                                            }
+                                            break;
+                                        case "dip=":
+                                            if (monarchToggle && !leaderToggle)
+                                            {
+                                                monarchDip = int.Parse(endStatement[j + 1]);
+                                            }
+                                            if (!monarchToggle && !leaderToggle)
+                                            {
+                                                heirDip = int.Parse(endStatement[j + 1]);
+                                            }
+                                            break;
+                                        case "mil=":
+                                            if (monarchToggle && !leaderToggle)
+                                            {
+                                                monarchMil = int.Parse(endStatement[j + 1]);
+                                            }
+                                            if (!monarchToggle && !leaderToggle)
+                                            {
+                                                heirMil = int.Parse(endStatement[j + 1]);
+                                            }
+                                            break;
+                                        case "regent=":
+                                            if(endStatement[j + 1].Contains("yes"))
+                                                {
+                                                if (monarchToggle && !leaderToggle)
+                                                {
+                                                    monarchRegent = true;
+                                                }
+                                                if (!monarchToggle && !leaderToggle)
+                                                {
+                                                    heirRegent = true;
+                                                }
+                                            }
+                                            if (endStatement[j + 1].Contains("no"))
+                                            {
+                                                if (monarchToggle && !leaderToggle)
+                                                {
+                                                    monarchRegent = true;
+                                                }
+                                                if (!monarchToggle && !leaderToggle)
+                                                {
+                                                    heirRegent = true;
+                                                }
+                                            }
+                                            break;
+                                        case "female=":
+                                            if (endStatement[j + 1].Contains("yes"))
+                                            {
+                                                if (monarchToggle && !leaderToggle)
+                                                {
+                                                    monarchFemale = true;
+                                                }
+                                                if (!monarchToggle && !leaderToggle)
+                                                {
+                                                    heirFemale = true;
+                                                }
+                                            }
+                                            if (endStatement[j + 1].Contains("no"))
+                                            {
+                                                if (monarchToggle && !leaderToggle)
+                                                {
+                                                   monarchFemale = false;
+                                                }
+                                                if (!monarchToggle && !leaderToggle)
+                                                {
+                                                    heirFemale = false;
+                                                }
+                                            }
+                                            break;
+                                        case "government=":
+                                            governmentType = endStatement[j +1];
+                                            break;
+                                        default:
+                                            break;
+
+                                    }
+                                }
+                            }
+                       
                     }
                 }
 
@@ -556,7 +861,9 @@ namespace Eu4Parser
 
 
                 }
-                Country country = new Country(tag, primaryCulture, techGroup, governmentType, religion, provinces, captialId, mercantilism);
+                monarch = new Monarch(monarchName, monarchDynasty,monarchMonarchName, monarchAdm, monarchDip, monarchMil,monarchFemale, monarchRegent);
+                heir = new Monarch(heirName, heirDynasty,heirMonarchName, heirAdm, heirDip, heirMil, heirFemale, heirRegent);
+                Country country = new Country(tag, primaryCulture, techGroup, governmentType, religion, provinces, captialId, mercantilism, monarch, heir);
                 if (tag != "")
                 {
                     foreach (string line in filePaths)
@@ -630,7 +937,7 @@ namespace Eu4Parser
                         statement[0] == "union"||
                         statement[0] == "dependency"||
                         statement[0] == "guarantee"||
-                        statement[0] == "guarantee")
+                        statement[0] == "march")
                     {
 
                         endStatement = GetStatement(lines, i);
@@ -638,14 +945,14 @@ namespace Eu4Parser
                         {
                             switch (endStatement[j])
                             {
-                                case "first":
-                                    first = endStatement[j + 2];
+                                case "first=":
+                                    first = endStatement[j + 1];
                                     break;
-                                case "second":
-                                    second = endStatement[j + 2];
+                                case "second=":
+                                    second = endStatement[j + 1];
                                     break;
-                                case "start_date":
-                                    string[] dateString = endStatement[j + 2].Split('.');
+                                case "start_date=":
+                                    string[] dateString = endStatement[j + 1].Split('.');
                                     if (dateString[0].StartsWith("1"))
                                     {
                                         try
@@ -660,8 +967,8 @@ namespace Eu4Parser
                                         }
                                     }
                                     break;
-                                case "end_date":
-                                     dateString = endStatement[j + 2].Split('.');
+                                case "end_date=":
+                                     dateString = endStatement[j + 1].Split('.');
                                     if (dateString[0].StartsWith("1"))
                                     {
 
@@ -679,11 +986,11 @@ namespace Eu4Parser
                                         }
                                     }
                                     break;
-                                case "trade_league":
+                                case "trade_league=":
                                     tradeLeague = true;
                                     break;
-                                case "subject_type":
-                                    if(endStatement[j+2].Contains("tributary_state"))
+                                case "subject_type=":
+                                    if(endStatement[j+1].Contains("tributary_state"))
                                     tributary = true;
                                     break;
                                 default:
@@ -711,13 +1018,13 @@ namespace Eu4Parser
                                        
                                         switch (endStatement[j])
                                         {
-                                            case "celestial_emperor":
+                                            case "celestial_emperor=":
                                                
                                                 if (celestialEmp == null)
                                                 {
                                                     foreach (Country country in countries)
                                                     {
-                                                        if(country.tag == endStatement[j+2])
+                                                        if(country.tag == endStatement[j+1])
                                                         {
                                                             country.isCelestialEmperor = true;
                                                             celestialEmp = country;
@@ -729,7 +1036,7 @@ namespace Eu4Parser
                                                 {
                                                     foreach (Country country in countries)
                                                     {
-                                                        if (country.tag == endStatement[j + 2])
+                                                        if (country.tag == endStatement[j + 1])
                                                         {
                                                             country.isCelestialEmperor = true;
                                                             celestialEmp.isCelestialEmperor = false;
@@ -738,13 +1045,13 @@ namespace Eu4Parser
                                                     }
                                                 }
                                                 break;
-                                            case "emperor":
+                                            case "emperor=":
 
                                                 if (hreEmp == null)
                                                 {
                                                     foreach (Country country in countries)
                                                     {
-                                                        if (country.tag == endStatement[j + 2])
+                                                        if (country.tag == endStatement[j +1])
                                                         {
                                                             country.isHREEmperor = true;
                                                             hreEmp = country;
@@ -756,7 +1063,7 @@ namespace Eu4Parser
                                                 {
                                                     foreach (Country country in countries)
                                                     {
-                                                        if (country.tag == endStatement[j + 2])
+                                                        if (country.tag == endStatement[j +1])
                                                         {
                                                             country.isHREEmperor = true;
                                                             hreEmp.isHREEmperor = false;
@@ -879,6 +1186,9 @@ namespace Eu4Parser
             for (int i = startIndex; i < lines.Length; i++)
             {
                 string lineHolder = Regex.Replace(lines[i], @"\t", " ");
+                lineHolder = Regex.Replace(lineHolder, " =", " = ");
+                lineHolder = Regex.Replace(lineHolder, " = ", "= ");
+
                 while (lineHolder.Contains("  "))
                     lineHolder = Regex.Replace(lineHolder, "  ", " ");
                 string[] line = lineHolder.Split(' ');

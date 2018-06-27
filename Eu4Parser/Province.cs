@@ -74,6 +74,7 @@ namespace Eu4Parser
         }
         public void PrintName()
         {
+          
             Console.WriteLine(id + "-" + owner + " " + capital);
         }
     }
