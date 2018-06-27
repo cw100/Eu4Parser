@@ -12,7 +12,8 @@ namespace Eu4Parser
         
         public int dip,mil,adm;
         public bool female, regent;
-        public Monarch(string name, string dynasty, string monarchName,  int adm, int dip,int mil,bool female, bool regent)
+        public bool isLeader;
+        public Monarch(string name, string dynasty, string monarchName,  int adm, int dip,int mil,bool female, bool regent, bool isLeader)
         {
             this.name = name;
             this.dynasty = dynasty;
@@ -22,6 +23,7 @@ namespace Eu4Parser
             this.adm = adm;
             this.female = female;
             this.regent = regent;
+            this.isLeader = isLeader;
         }
         public void Print()
         {

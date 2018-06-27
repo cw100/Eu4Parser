@@ -11,6 +11,7 @@ namespace Eu4Parser
             
     class Country
     {
+        public List<Leader> leaders;
         public string tag;
         public string name;
         public string primaryCulture;
@@ -49,9 +50,10 @@ namespace Eu4Parser
         public bool isCelestialEmperor;
         public bool isTradeLeader;
         public Monarch monarch, heir;
-        public Country(string tag, string primaryCulture, string techGroup, string governmentType, 
-            string religion, List<Province> provinces, int captialId, int mercantilism , Monarch monarch, Monarch heir)
+        public Country(string tag, string primaryCulture, string techGroup, string governmentType,
+            string religion, List<Province> provinces, int captialId, int mercantilism, Monarch monarch, Monarch heir, List<Leader> leaders)
         {
+            this.leaders = leaders;
             this.monarch = monarch;
             this.heir = heir;
             marches = new List<Country>();
@@ -455,7 +457,17 @@ namespace Eu4Parser
                 Console.BackgroundColor = ConsoleColor.Black;
             }
         }
-            static ConsoleColor ClosestConsoleColor(byte r, byte g, byte b)
+        public void PrintLeaders()
+        {
+            PrintName(false);
+            foreach (Leader leader in leaders)
+            {
+              
+                Console.Write("\t");
+                leader.Print();
+            }
+        }
+        static ConsoleColor ClosestConsoleColor(byte r, byte g, byte b)
         {
             ConsoleColor ret = 0;
             double rr = r, gg = g, bb = b, delta = double.MaxValue;

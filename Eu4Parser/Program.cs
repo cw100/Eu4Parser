@@ -48,7 +48,7 @@ namespace Eu4Parser
             }
             foreach (Country country in countries)
             {
-                country.PrintMonarchs();
+                country.PrintLeaders();
             }
             Console.Read();
         }
@@ -505,12 +505,20 @@ namespace Eu4Parser
             int heirDip = 0;
             int heirMil =0;
             bool monarchToggle=false;
-            bool leaderToggle = false;
+            
 
             bool monarchFemale = false;
             bool monarchRegent = false;
+            bool monarchLeader = false;
             bool heirFemale = false;
             bool heirRegent = false;
+            bool heirLeader = false;
+            string leaderName = "";
+            string leaderType = "";
+            int fire = 0;
+            int shock = 0;
+            int manuever = 0;
+            int siege = 0;
             string[] filePaths = File.ReadAllLines(path + @"\common\country_tags\00_countries.txt");
             for (int i = 0; i < filePaths.Count(); i++)
             {
@@ -541,12 +549,18 @@ namespace Eu4Parser
                 heirDip = 0;
                 heirMil = 0;
                 monarchToggle = false;
-                leaderToggle = false;
-
+                
+                List<Leader> leaders = new List<Leader>();
                 monarchFemale = false;
                 monarchRegent = false;
                 heirFemale = false;
                 heirRegent = false;
+                 leaderName = "";
+                 leaderType = "";
+                 fire = 0;
+                 shock = 0;
+                 manuever = 0;
+                 siege = 0;
                 for (int i = 0; i < lines.Length; i++)
                 {
 
@@ -603,6 +617,7 @@ namespace Eu4Parser
                             DateTime thisDate = new DateTime(int.Parse(Regex.Replace(dateString[0], "[^.0-9]", ""))
                                 , int.Parse(Regex.Replace(dateString[1], "[^.0-9]", "")),
                                 int.Parse(Regex.Replace(dateString[2], "[^.0-9]", "")));
+                        DateTime deathDate = new DateTime(1, 1, 1);
                         if (lastDate == new DateTime(1, 1, 1))
                         {
                             lastDate = thisDate;
@@ -628,13 +643,33 @@ namespace Eu4Parser
                                 heirDip = 0;
                                 heirMil = 0;
                                 monarchToggle = false;
-                                leaderToggle = false;
-
-                                monarchFemale = false;
+                                monarchLeader = false;
+                                heirLeader = false;
+                                  monarchFemale = false;
                                 monarchRegent = false;
                                 heirFemale = false;
                                 heirRegent = false;
-                                lastDate = thisDate;
+                               
+                                    for (int b = leaders.Count() - 1; b >= 0; b--)
+                                    {
+                                        if (leaders[b].monarchType == "monarch" || leaders[b].monarchType == "heir")
+                                        {
+                                            leaders.RemoveAt(b);
+                                        }
+                                    }
+                                
+
+                            }
+                            if(endStatement[1] == "leader=")
+                            {
+                                monarchLeader = false;
+                                heirLeader = false;
+                                leaderName = "";
+                                leaderType = "";
+                                fire = 0;
+                                shock = 0;
+                                manuever = 0;
+                                siege = 0;
                             }
                             for (int j = 0; j < endStatement.Count; j++)
                                 {
@@ -643,17 +678,41 @@ namespace Eu4Parser
                                     {
                                         case "monarch=":
                                             monarchToggle = true;
-                                            leaderToggle = false;
+                                            
                                             break;
                                         case "heir=":
                                             monarchToggle = false;
-                                            leaderToggle = false;
+                                            
                                             break;
-                                        case "leader=":
-                                            leaderToggle = true;
+                                    case "leader=":
+                                         
+                                        if(endStatement[1] == "monarch=")
+                                        {
+                                            monarchLeader = true;
+                                        }
+                                            if (endStatement[1] == "heir=")
+                                        {
+                                            heirLeader = true;
+                                        }
                                                 break;
                                         case "name=":
-                                            if(monarchToggle&&!leaderToggle)
+                                        if (endStatement[1] == "leader="|| (monarchLeader|| heirLeader))
+                                        {
+                                            leaderName = "";
+                                            for (int k = j + 1; k < endStatement.Count; k++)
+                                            {
+                                                if (!endStatement[k].Contains("#") && !endStatement[k].Contains("\r") && !endStatement[k].Contains("type=") )
+                                                {
+                                                    leaderName += Regex.Replace(endStatement[k], "\"", "") + " ";
+                                                }
+                                                if (endStatement[k].EndsWith("\"") || endStatement[k].Contains("#") || endStatement[k].Contains("\r") || endStatement[k].Contains("type=") )
+                                                {
+                                                    leaderName = leaderName.Trim();
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                            if (monarchToggle&&!(endStatement[1] == "leader="))
                                             {
                                                 monarchName = "";
                                                 for (int k = j + 1; k < endStatement.Count; k++)
@@ -671,7 +730,7 @@ namespace Eu4Parser
                                                 }
                                                
                                             }
-                                            if (!monarchToggle && !leaderToggle)
+                                            if (!monarchToggle && !(endStatement[1] == "leader="))
                                             {
                                                
                                             heirName = "";
@@ -691,7 +750,7 @@ namespace Eu4Parser
                                         }
                                             break;
                                         case "monarch_name=":
-                                            if (monarchToggle && !leaderToggle)
+                                            if (monarchToggle && !(endStatement[1] == "leader="))
                                             {
                                                 monarchMonarchName = "";
                                                 for (int k = j +1; k < endStatement.Count; k++)
@@ -706,7 +765,7 @@ namespace Eu4Parser
 
                                                 }
                                             }
-                                            if (!monarchToggle && !leaderToggle)
+                                            if (!monarchToggle && !(endStatement[1] == "leader="))
                                             {
                                                 heirMonarchName = "";
                                                 for (int k = j +1; k < endStatement.Count; k++)
@@ -723,7 +782,7 @@ namespace Eu4Parser
                                             }
                                             break;
                                         case "dynasty=":
-                                            if (monarchToggle && !leaderToggle)
+                                            if (monarchToggle && !(endStatement[1] == "leader="))
                                             {
                                                
                                             monarchDynasty = "";
@@ -741,7 +800,7 @@ namespace Eu4Parser
 
                                             }
                                         }
-                                            if (!monarchToggle && !leaderToggle)
+                                            if (!monarchToggle && !(endStatement[1] == "leader="))
                                             {
                                                 
                                             heirDynasty = "";
@@ -761,31 +820,31 @@ namespace Eu4Parser
                                         }
                                             break;
                                         case "adm=":
-                                            if (monarchToggle && !leaderToggle)
+                                            if (monarchToggle && !(endStatement[1] == "leader="))
                                             {
                                                 monarchAdm = int.Parse(endStatement[j + 1]);
                                             }
-                                            if (!monarchToggle && !leaderToggle)
+                                            if (!monarchToggle && !(endStatement[1] == "leader="))
                                             {
                                                 heirAdm = int.Parse(endStatement[j + 1]);
                                             }
                                             break;
                                         case "dip=":
-                                            if (monarchToggle && !leaderToggle)
+                                            if (monarchToggle &&!(endStatement[1] == "leader="))
                                             {
                                                 monarchDip = int.Parse(endStatement[j + 1]);
                                             }
-                                            if (!monarchToggle && !leaderToggle)
+                                            if (!monarchToggle && !(endStatement[1] == "leader="))
                                             {
                                                 heirDip = int.Parse(endStatement[j + 1]);
                                             }
                                             break;
                                         case "mil=":
-                                            if (monarchToggle && !leaderToggle)
+                                            if (monarchToggle && !(endStatement[1] == "leader="))
                                             {
                                                 monarchMil = int.Parse(endStatement[j + 1]);
                                             }
-                                            if (!monarchToggle && !leaderToggle)
+                                            if (!monarchToggle && !(endStatement[1] == "leader="))
                                             {
                                                 heirMil = int.Parse(endStatement[j + 1]);
                                             }
@@ -793,22 +852,22 @@ namespace Eu4Parser
                                         case "regent=":
                                             if(endStatement[j + 1].Contains("yes"))
                                                 {
-                                                if (monarchToggle && !leaderToggle)
+                                                if (monarchToggle && !(endStatement[1] == "leader="))
                                                 {
                                                     monarchRegent = true;
                                                 }
-                                                if (!monarchToggle && !leaderToggle)
+                                                if (!monarchToggle && !(endStatement[1] == "leader="))
                                                 {
                                                     heirRegent = true;
                                                 }
                                             }
                                             if (endStatement[j + 1].Contains("no"))
                                             {
-                                                if (monarchToggle && !leaderToggle)
+                                                if (monarchToggle && !(endStatement[1] == "leader="))
                                                 {
                                                     monarchRegent = true;
                                                 }
-                                                if (!monarchToggle && !leaderToggle)
+                                                if (!monarchToggle && !(endStatement[1] == "leader="))
                                                 {
                                                     heirRegent = true;
                                                 }
@@ -817,22 +876,22 @@ namespace Eu4Parser
                                         case "female=":
                                             if (endStatement[j + 1].Contains("yes"))
                                             {
-                                                if (monarchToggle && !leaderToggle)
+                                                if (monarchToggle && !(endStatement[1] == "leader="))
                                                 {
                                                     monarchFemale = true;
                                                 }
-                                                if (!monarchToggle && !leaderToggle)
+                                                if (!monarchToggle && !(endStatement[1] == "leader="))
                                                 {
                                                     heirFemale = true;
                                                 }
                                             }
                                             if (endStatement[j + 1].Contains("no"))
                                             {
-                                                if (monarchToggle && !leaderToggle)
+                                                if (monarchToggle && !(endStatement[1] == "leader="))
                                                 {
                                                    monarchFemale = false;
                                                 }
-                                                if (!monarchToggle && !leaderToggle)
+                                                if (!monarchToggle && !(endStatement[1] == "leader="))
                                                 {
                                                     heirFemale = false;
                                                 }
@@ -841,12 +900,74 @@ namespace Eu4Parser
                                         case "government=":
                                             governmentType = endStatement[j +1];
                                             break;
-                                        default:
+                                    case "death_date=":
+                                        if (endStatement[1] == "leader=")
+                                        {
+                                            string[] deathDateString = endStatement[j+1].Split('.');
+                                            deathDate = new DateTime(int.Parse(Regex.Replace(deathDateString[0], "[^.0-9]", ""))
+                                                  , int.Parse(Regex.Replace(deathDateString[1], "[^.0-9]", "")),
+                                                 int.Parse(Regex.Replace(deathDateString[2], "[^.0-9]", "")));
+                                        }
+                                            break;
+                                    case "fire=":
+                                        fire = int.Parse(Regex.Replace(endStatement[j+1], "[^.0-9]", ""));
+                                        break;
+                                    case "shock=":
+                                        shock = int.Parse(Regex.Replace(endStatement[j + 1], "[^.0-9]", ""));
+                                        break;
+                                    case "manuever=":
+                                        manuever = int.Parse(Regex.Replace(endStatement[j + 1], "[^.0-9]", ""));
+                                        break;
+                                    case "siege=":
+                                        siege = int.Parse(Regex.Replace(endStatement[j + 1], "[^.0-9]", ""));
+                                        break;
+                                    case "type=":
+                                        leaderType = endStatement[j + 1];
+                                        break;
+                                    default:
                                             break;
 
                                     }
+                               
                                 }
+                            if ((endStatement[1] == "leader=" && deathDate >= date && leaderName != "" && thisDate <= date) || ((heirLeader||monarchLeader) && thisDate <= date))
+                            {
+                                if(monarchLeader||heirLeader)
+                                {
+                                   
+                                    if (monarchLeader)
+                                    {
+                                        
+                                        leaders.Add(new Leader(leaderName, leaderType, fire, shock, manuever, siege, "monarch"));
+                                        
+                                    }
+                                    if (heirLeader)
+                                    {
+                                       
+                                        leaders.Add(new Leader(leaderName, leaderType, fire, shock, manuever, siege, "heir"));
+                                        
+                                    }
+                                }
+                                else
+                                {
+                                  
+                                  
+                                    leaders.Add(new Leader(leaderName, leaderType, fire, shock, manuever, siege,""));
+                                }
+                               
+
+                                monarchLeader = false;
+                                heirLeader = false;
+                                leaderName = "";
+                                leaderType = "";
+                                fire = 0;
+                                shock = 0;
+                                manuever = 0;
+                                siege = 0;
+                               
                             }
+                            lastDate = thisDate;
+                        }
                        
                     }
                 }
@@ -861,9 +982,9 @@ namespace Eu4Parser
 
 
                 }
-                monarch = new Monarch(monarchName, monarchDynasty,monarchMonarchName, monarchAdm, monarchDip, monarchMil,monarchFemale, monarchRegent);
-                heir = new Monarch(heirName, heirDynasty,heirMonarchName, heirAdm, heirDip, heirMil, heirFemale, heirRegent);
-                Country country = new Country(tag, primaryCulture, techGroup, governmentType, religion, provinces, captialId, mercantilism, monarch, heir);
+                monarch = new Monarch(monarchName, monarchDynasty,monarchMonarchName, monarchAdm, monarchDip, monarchMil,monarchFemale, monarchRegent, monarchLeader);
+                heir = new Monarch(heirName, heirDynasty,heirMonarchName, heirAdm, heirDip, heirMil, heirFemale, heirRegent, heirLeader);
+                Country country = new Country(tag, primaryCulture, techGroup, governmentType, religion, provinces, captialId, mercantilism, monarch, heir,leaders);
                 if (tag != "")
                 {
                     foreach (string line in filePaths)
