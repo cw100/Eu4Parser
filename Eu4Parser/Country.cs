@@ -28,10 +28,10 @@ namespace Eu4Parser
         public int mercantilism;
         public bool existsInCurrentDate;
         public bool inHRE;
-
+        public int fortLevel;
         public Dictionary<string, int> numberOfTradeGoods;
         public int numberOfForts;
-
+        public List<Province> cores;
         public List<Country> vassals;
         public List<Country> marches;
         public List<Country> alliances;
@@ -51,7 +51,7 @@ namespace Eu4Parser
         public bool isTradeLeader;
 
         public Country(string tag, string primaryCulture, string techGroup, string governmentType, 
-            string religion, List<Province> provinces, int captialId, int mercantilism)
+            string religion, List<Province> provinces, int captialId, int mercantilism )
         {
             marches = new List<Country>();
             vassals = new List<Country>();
@@ -62,7 +62,7 @@ namespace Eu4Parser
             tradeLeague = new List<Country>();
             guaranteeing = new List<Country>();
             guaranteedBy = new List<Country>();
-
+          
             isHREEmperor = false;
             isCelestialEmperor = false;
             isTradeLeader = false;
@@ -152,6 +152,21 @@ namespace Eu4Parser
         {
             this.name = name;
         }
+        public void ResolveCores(List<Province> provinces)
+        {
+            cores = new List<Province>();
+           
+            foreach (Province province in provinces)
+            {
+                foreach (Country country in province.cores)
+                {
+                    if (country == this)
+                    {
+                        cores.Add(province);
+                    }
+                }
+            }
+        }
         public void SetColour(string r, string g, string b)
         {
             try
@@ -230,20 +245,26 @@ namespace Eu4Parser
                 }
             }
         }
-        public void PrintName()
+        public void PrintName(bool colors)
         {
-            if (ClosestConsoleColor(color.R, color.G, color.B) != ConsoleColor.Black)
+            if (colors)
             {
-                Console.ForegroundColor = ClosestConsoleColor(color.R, color.G, color.B);
-            }
-            else
-            {
-                Console.ForegroundColor = ClosestConsoleColor(color.R, color.G, color.B);
-                Console.BackgroundColor = ConsoleColor.White;
+                if (ClosestConsoleColor(color.R, color.G, color.B) != ConsoleColor.Black)
+                {
+                    Console.ForegroundColor = ClosestConsoleColor(color.R, color.G, color.B);
+                }
+                else
+                {
+                    Console.ForegroundColor = ClosestConsoleColor(color.R, color.G, color.B);
+                    Console.BackgroundColor = ConsoleColor.White;
+                }
             }
             Console.WriteLine(tag + " " + name);
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.BackgroundColor = ConsoleColor.Black;
+            if (colors)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.BackgroundColor = ConsoleColor.Black;
+            }
         }
         public void PrintDevelopment()
         {
@@ -269,7 +290,7 @@ namespace Eu4Parser
         {
             if (existsInCurrentDate)
             { 
-            PrintName();
+            PrintName(false);
                 if(isCelestialEmperor)
                 {
                     Console.WriteLine("\tIs the Celestial Emperor!");
@@ -284,7 +305,7 @@ namespace Eu4Parser
                 foreach(Country country in alliances )
                 {
                     Console.Write("\t\t");
-                    country.PrintName();
+                    country.PrintName(false);
                 }
             }
             if (royalMarriages.Count() > 0)
@@ -293,7 +314,7 @@ namespace Eu4Parser
                 foreach (Country country in royalMarriages)
                 {
                     Console.Write("\t\t");
-                    country.PrintName();
+                    country.PrintName(false);
                 }
             }
             if (unions.Count() > 0|| unionOverlord != null)
@@ -302,12 +323,12 @@ namespace Eu4Parser
                 foreach (Country country in unions)
                 {
                    Console.Write("\t\tOverlord of: ");
-                   country.PrintName();
+                   country.PrintName(false);
                 }
                 if (unionOverlord != null)
                 {
                     Console.Write("\t\tUnion under: ");
-                    unionOverlord.PrintName();
+                    unionOverlord.PrintName(false);
                 }
 
             }
@@ -317,12 +338,12 @@ namespace Eu4Parser
                 foreach (Country country in vassals)
                 {
                     Console.Write("\t\tOverlord of: ");
-                    country.PrintName();
+                    country.PrintName(false);
                 }
                 if (vassalOverlord != null)
                 {
                     Console.Write("\t\tVassal under: ");
-                    vassalOverlord.PrintName();
+                    vassalOverlord.PrintName(false);
                 }
 
             }
@@ -332,12 +353,12 @@ namespace Eu4Parser
                 foreach (Country country in marches)
                 {
                     Console.Write("\t\tOverlord of: ");
-                    country.PrintName();
+                    country.PrintName(false);
                 }
                 if (marchOverlord != null)
                 {
                     Console.Write("\t\tMarch under: ");
-                        marchOverlord.PrintName();
+                        marchOverlord.PrintName(false);
                 }
 
             }
@@ -347,12 +368,12 @@ namespace Eu4Parser
                 foreach (Country country in tributaries)
                 {
                     Console.Write("\t\tOverlord of: ");
-                    country.PrintName();
+                    country.PrintName(false);
                 }
                 if (tributaryOverlord != null)
                 {
                     Console.Write("\t\tTributary under: ");
-                    tributaryOverlord.PrintName();
+                    tributaryOverlord.PrintName(false);
                 }
 
             }
@@ -365,7 +386,7 @@ namespace Eu4Parser
                         foreach (Country country in tradeLeague)
                         {
                             Console.Write("\t\t\t");
-                            country.PrintName();
+                            country.PrintName(false);
 
                         }
 
@@ -373,14 +394,14 @@ namespace Eu4Parser
                     else
                     {
                         Console.Write("\t\tTrade League member under: ");
-                        tradeLeagueLeader.PrintName();
+                        tradeLeagueLeader.PrintName(false);
 
                         foreach (Country country in tradeLeagueLeader.tradeLeague)
                         {
                             if (country != this)
                             {
                                 Console.Write("\t\t\t");
-                                country.PrintName();
+                                country.PrintName(false);
                             }
 
                         }
@@ -393,12 +414,12 @@ namespace Eu4Parser
                     foreach (Country country in guaranteeing)
                     {
                         Console.Write("\t\tGuaranteeing: ");
-                        country.PrintName();
+                        country.PrintName(false);
                     }
                     foreach (Country country in guaranteedBy)
                     {
                         Console.Write("\t\tGuaranteed By: ");
-                        country.PrintName();
+                        country.PrintName(false);
                     }
 
                 }
@@ -406,6 +427,22 @@ namespace Eu4Parser
 
         }
 
+        public void PrintCores()
+        {
+            PrintName(false);
+            foreach(Province province in cores)
+            {
+                if(!provinces.Contains(province))
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.BackgroundColor = ConsoleColor.Red;
+                }
+                Console.Write("\t");
+                province.PrintName();
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.BackgroundColor = ConsoleColor.Black;
+            }
+        }
             static ConsoleColor ClosestConsoleColor(byte r, byte g, byte b)
         {
             ConsoleColor ret = 0;

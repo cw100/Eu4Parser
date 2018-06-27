@@ -36,9 +36,19 @@ namespace Eu4Parser
             //    province.Print();
             //}
             LoadDiplomacy(path, countries, startDate);
+           
+           
+            foreach (Province province in provinces)
+            {
+                province.ResolveCores(countries);
+            }
             foreach (Country country in countries)
             {
-                country.PrintDiplomacy();
+                country.ResolveCores(provinces);
+            }
+            foreach (Country country in countries)
+            {
+                country.PrintCores();
             }
             Console.Read();
         }
@@ -54,7 +64,7 @@ namespace Eu4Parser
             List<Province> provinces = new List<Province>();
             foreach (string file in Directory.EnumerateFiles(path + @"\history\provinces\", "*.txt"))
             {
-
+                List<string> cores = new List<string>();
                 string owner = "";
                 string controller = "";
                 string religion = "";
@@ -70,6 +80,7 @@ namespace Eu4Parser
                 int id = 0;
                 bool coal = false;
                 bool fort = false;
+                int fortLevel = 0;
                 try
                 {
                     id = int.Parse(Path.GetFileName(file).Split(' ')[0]);
@@ -187,7 +198,57 @@ namespace Eu4Parser
                             break;
                         case "fort_15th":
                             if (statement[2].Trim().Contains("yes"))
+                            {
                                 fort = true;
+                                fortLevel = 1;
+                            }
+                            if (statement[2].Trim().Contains("no"))
+                            {
+                                fort = false;
+                                fortLevel = 0;
+                            }
+                            break;
+                        case "fort_16th":
+                            if (statement[2].Trim().Contains("yes"))
+                            {
+                                fort = true;
+                                fortLevel = 2;
+                            }
+                            if (statement[2].Trim().Contains("no"))
+                            {
+                                fort = false;
+                                fortLevel = 0;
+                            }
+                            break;
+                        case "fort_17th":
+                            if (statement[2].Trim().Contains("yes"))
+                            {
+                                fort = true;
+                                fortLevel = 3;
+                            }
+                            if (statement[2].Trim().Contains("no"))
+                            {
+                                fort = false;
+                                fortLevel = 0;
+                            }
+                            break;
+                        case "fort_18th":
+                            if (statement[2].Trim().Contains("yes"))
+                            {
+                                fort = true;
+                                fortLevel = 4;
+                            }
+                            if (statement[2].Trim().Contains("no"))
+                            {
+                                fort = false;
+                                fortLevel = 0;
+                            }
+                            break;
+                        case "add_core":
+                            cores.Add(statement[2]);
+                            break;
+                        case "remove_core":
+                            cores.Remove(statement[2]);
                             break;
                         default:
                             break;
@@ -345,7 +406,57 @@ namespace Eu4Parser
                                         break;
                                     case "fort_15th":
                                         if (updateProvinceStatements[k + 2].Contains("yes"))
+                                        {
                                             fort = true;
+                                            fortLevel = 1;
+                                        }
+                                        if (updateProvinceStatements[k + 2].Contains("no"))
+                                        {
+                                            fort = false;
+                                            fortLevel = 0;
+                                        }
+                                        break;
+                                    case "fort_16th":
+                                        if (updateProvinceStatements[k + 2].Contains("yes"))
+                                        {
+                                            fort = true;
+                                            fortLevel = 2;
+                                        }
+                                        if (updateProvinceStatements[k + 2].Contains("no"))
+                                        {
+                                            fort = false;
+                                            fortLevel = 0;
+                                        }
+                                        break;
+                                    case "fort_17th":
+                                        if (updateProvinceStatements[k + 2].Contains("yes"))
+                                        {
+                                            fort = true;
+                                            fortLevel = 3;
+                                        }
+                                        if (updateProvinceStatements[k + 2].Contains("no"))
+                                        {
+                                            fort = false;
+                                            fortLevel = 0;
+                                        }
+                                        break;
+                                    case "fort_18th":
+                                        if (updateProvinceStatements[k + 2].Contains("yes"))
+                                        {
+                                            fort = true;
+                                            fortLevel = 4;
+                                        }
+                                        if (updateProvinceStatements[k + 2].Contains("no"))
+                                        {
+                                            fort = false;
+                                            fortLevel = 0;
+                                        }
+                                        break;
+                                    case "add_core":
+                                        cores.Add(updateProvinceStatements[k + 2]);
+                                        break;
+                                    case "remove_core":
+                                        cores.Remove(updateProvinceStatements[k + 2]);
                                         break;
                                     default:
                                         break;
@@ -361,7 +472,7 @@ namespace Eu4Parser
 
 
 
-                Province province = new Province(id, owner, controller, capital, tradeGood, religion, culture, tax, production, manpower, centerOfTrade, city, hre, coal, fort);
+                Province province = new Province(id, owner, controller, capital, tradeGood, religion, culture, tax, production, manpower, centerOfTrade, city, hre, coal, fort,fortLevel,cores);
                 provinces.Add(province);
             }
             return provinces;
@@ -650,6 +761,10 @@ namespace Eu4Parser
                                                             country.isHREEmperor = true;
                                                             hreEmp.isHREEmperor = false;
                                                             hreEmp = country;
+                                                        }
+                                                        if (endStatement[j + 2] == "---")
+                                                        {
+                                                            hreEmp.isHREEmperor = false;
                                                         }
                                                     }
                                                 }
