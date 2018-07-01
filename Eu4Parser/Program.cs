@@ -937,10 +937,7 @@ namespace Eu4Parser
                                 }
                             if ((endStatement[1] == "leader=" && deathDate >= date && leaderName != "" && thisDate <= date) || ((heirLeader||monarchLeader) && thisDate <= date && deathDate >= date))
                             {
-                                if(tag=="POR")
-                                {
-                                    var asd = 0;
-                                }
+                               
                                 if(monarchLeader||heirLeader)
                                 {
                                    
