@@ -48,8 +48,13 @@ namespace Eu4Parser
             }
             foreach (Country country in countries)
             {
+                country.PrintMonarchs();
+            }
+            foreach (Country country in countries)
+            {
                 country.PrintLeaders();
             }
+
             Console.Read();
         }
         public static string LoadFile(string path)
@@ -490,8 +495,8 @@ namespace Eu4Parser
             string religion = "";
             int captialId = 0;
            int mercantilism = 0;
-            Monarch monarch;
-            Monarch heir;
+            Monarch monarch= null;
+            Monarch heir = null;
             string monarchName = "";
             string heirName = "";
             string monarchMonarchName = "";
@@ -628,38 +633,7 @@ namespace Eu4Parser
                             {
                                 List<string> endStatement = GetStatement(lines, i);
                             
-                            if (lastDate != thisDate && endStatement[1]!= "leader=")
-                            {
-                                monarchName = "";
-                                heirName = "";
-                                monarchMonarchName = "";
-                                heirMonarchName = "";
-                                monarchDynasty = "";
-                                heirDynasty = "";
-                                monarchAdm = 0;
-                                monarchDip = 0;
-                                monarchMil = 0;
-                                heirAdm = 0;
-                                heirDip = 0;
-                                heirMil = 0;
-                                monarchToggle = false;
-                                monarchLeader = false;
-                                heirLeader = false;
-                                  monarchFemale = false;
-                                monarchRegent = false;
-                                heirFemale = false;
-                                heirRegent = false;
-                               
-                                    for (int b = leaders.Count() - 1; b >= 0; b--)
-                                    {
-                                        if (leaders[b].monarchType == "monarch" || leaders[b].monarchType == "heir")
-                                        {
-                                            leaders.RemoveAt(b);
-                                        }
-                                    }
-                                
-
-                            }
+                          
                             if(endStatement[1] == "leader=")
                             {
                                 monarchLeader = false;
@@ -677,22 +651,38 @@ namespace Eu4Parser
                                     switch (endStatement[j])
                                     {
                                         case "monarch=":
-                                            monarchToggle = true;
-                                            
-                                            break;
+                                        monarchToggle = true;
+                                        for (int b = leaders.Count() - 1; b >= 0; b--)
+                                        {
+                                            if (leaders[b].monarchType == "monarch")
+                                            {
+                                                leaders.RemoveAt(b);
+                                            }
+                                        }
+
+                                        break;
                                         case "heir=":
-                                            monarchToggle = false;
-                                            
-                                            break;
+                                        monarchToggle = false;
+                                        for (int b = leaders.Count() - 1; b >= 0; b--)
+                                        {
+                                            if (leaders[b].monarchType == "heir")
+                                            {
+                                                leaders.RemoveAt(b);
+                                            }
+                                        }
+
+                                        break;
                                     case "leader=":
-                                         
+                                       
                                         if(endStatement[1] == "monarch=")
                                         {
                                             monarchLeader = true;
+                                           
                                         }
                                             if (endStatement[1] == "heir=")
                                         {
                                             heirLeader = true;
+                                            
                                         }
                                                 break;
                                         case "name=":
@@ -939,13 +929,16 @@ namespace Eu4Parser
                                     {
                                         
                                         leaders.Add(new Leader(leaderName, leaderType, fire, shock, manuever, siege, "monarch"));
+                                       
                                         
+
                                     }
                                     if (heirLeader)
                                     {
                                        
                                         leaders.Add(new Leader(leaderName, leaderType, fire, shock, manuever, siege, "heir"));
                                         
+
                                     }
                                 }
                                 else
@@ -982,9 +975,60 @@ namespace Eu4Parser
 
 
                 }
-                monarch = new Monarch(monarchName, monarchDynasty,monarchMonarchName, monarchAdm, monarchDip, monarchMil,monarchFemale, monarchRegent, monarchLeader);
-                heir = new Monarch(heirName, heirDynasty,heirMonarchName, heirAdm, heirDip, heirMil, heirFemale, heirRegent, heirLeader);
+                
+               
+              
+
+                if (monarchName != "")
+                {
+                    
+                    monarch = new Monarch(monarchName, monarchDynasty, monarchMonarchName, monarchAdm, monarchDip, monarchMil, monarchFemale, monarchRegent, monarchLeader);
+                    monarchName = "";              
+                    monarchMonarchName = "";
+                    monarchDynasty = "";
+                    monarchAdm = 0;
+                    monarchDip = 0;
+                    monarchMil = 0;
+                    monarchToggle = false;
+                    monarchFemale = false;
+                    monarchRegent = false;
+                }
+                
+                if (heirName != "")
+                {
+                   
+                    heir = new Monarch(heirName, heirDynasty, heirMonarchName, heirAdm, heirDip, heirMil, heirFemale, heirRegent, heirLeader);
+                    heirName = "";
+                    heirMonarchName = "";
+                    heirDynasty = "";
+                    heirAdm = 0;
+                    heirDip = 0;
+                    heirMil = 0;
+                    heirFemale = false;
+                    heirRegent = false;
+                }
+             
+                
+                if (heir != null && monarch!=null)
+                {
+                    if (monarch.name == heir.monarchName)
+                    {
+                        heir = null;
+                        heirName = "";
+                        heirMonarchName = "";
+                        heirDynasty = "";
+                        heirAdm = 0;
+                        heirDip = 0;
+                        heirMil = 0;
+                        heirFemale = false;
+                        heirRegent = false;
+                        
+
+                    }
+                }
                 Country country = new Country(tag, primaryCulture, techGroup, governmentType, religion, provinces, captialId, mercantilism, monarch, heir,leaders);
+                monarch = null;
+                heir = null;
                 if (tag != "")
                 {
                     foreach (string line in filePaths)

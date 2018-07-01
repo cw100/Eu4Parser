@@ -435,10 +435,16 @@ namespace Eu4Parser
             if (existsInCurrentDate)
             {
                 PrintName(false);
-                Console.Write("\t");
-                monarch.Print();
-                Console.Write("\t");
-                heir.Print();
+                if (monarch != null)
+                {
+                    Console.Write("\t");
+                    monarch.Print();
+                }
+                if (heir != null)
+                {
+                    Console.Write("\t");
+                    heir.Print();
+                }
             }
         }
         public void PrintCores()
