@@ -554,7 +554,8 @@ namespace Eu4Parser
                 heirDip = 0;
                 heirMil = 0;
                 monarchToggle = false;
-                
+                monarchLeader = false;
+                heirLeader = false;
                 List<Leader> leaders = new List<Leader>();
                 monarchFemale = false;
                 monarchRegent = false;
@@ -676,13 +677,28 @@ namespace Eu4Parser
                                        
                                         if(endStatement[1] == "monarch=")
                                         {
+                                            
                                             monarchLeader = true;
-                                           
+                                            for (int b = leaders.Count() - 1; b >= 0; b--)
+                                            {
+                                                if (leaders[b].monarchType == "monarch")
+                                                {
+                                                    leaders.RemoveAt(b);
+                                                }
+                                            }
+
                                         }
                                             if (endStatement[1] == "heir=")
                                         {
                                             heirLeader = true;
-                                            
+                                            for (int b = leaders.Count() - 1; b >= 0; b--)
+                                            {
+                                                if (leaders[b].monarchType == "heir")
+                                                {
+                                                    leaders.RemoveAt(b);
+                                                }
+                                            }
+
                                         }
                                                 break;
                                         case "name=":
@@ -891,13 +907,12 @@ namespace Eu4Parser
                                             governmentType = endStatement[j +1];
                                             break;
                                     case "death_date=":
-                                        if (endStatement[1] == "leader=")
-                                        {
+                                        
                                             string[] deathDateString = endStatement[j+1].Split('.');
                                             deathDate = new DateTime(int.Parse(Regex.Replace(deathDateString[0], "[^.0-9]", ""))
                                                   , int.Parse(Regex.Replace(deathDateString[1], "[^.0-9]", "")),
                                                  int.Parse(Regex.Replace(deathDateString[2], "[^.0-9]", "")));
-                                        }
+                                        
                                             break;
                                     case "fire=":
                                         fire = int.Parse(Regex.Replace(endStatement[j+1], "[^.0-9]", ""));
@@ -920,8 +935,12 @@ namespace Eu4Parser
                                     }
                                
                                 }
-                            if ((endStatement[1] == "leader=" && deathDate >= date && leaderName != "" && thisDate <= date) || ((heirLeader||monarchLeader) && thisDate <= date))
+                            if ((endStatement[1] == "leader=" && deathDate >= date && leaderName != "" && thisDate <= date) || ((heirLeader||monarchLeader) && thisDate <= date && deathDate >= date))
                             {
+                                if(tag=="POR")
+                                {
+                                    var asd = 0;
+                                }
                                 if(monarchLeader||heirLeader)
                                 {
                                    
@@ -947,8 +966,8 @@ namespace Eu4Parser
                                   
                                     leaders.Add(new Leader(leaderName, leaderType, fire, shock, manuever, siege,""));
                                 }
-                               
 
+                                deathDate = new DateTime(1, 1, 1);
                                 monarchLeader = false;
                                 heirLeader = false;
                                 leaderName = "";
@@ -1022,7 +1041,14 @@ namespace Eu4Parser
                         heirMil = 0;
                         heirFemale = false;
                         heirRegent = false;
-                        
+                        for (int b = leaders.Count() - 1; b >= 0; b--)
+                        {
+                            if (leaders[b].monarchType == "heir")
+                            {
+                                leaders.RemoveAt(b);
+                            }
+                        }
+
 
                     }
                 }

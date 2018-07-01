@@ -95,6 +95,11 @@ namespace Eu4Parser
           
             
         }
+
+        public void ResolveLeaderDeaths()
+        {
+
+        }
         public void AddMarch(Country country)
         {
             marches.Add(country);
